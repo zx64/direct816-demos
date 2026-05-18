@@ -98,7 +98,8 @@ Theoretically the Direct8 conversion could also be assisted by the second core b
 that code is pure C++, it would need more complex code to share with MicroPython.
 
 # TODO
-New effects
-UI
-Package into a Badgeware app - currently I'm just copying libraries and launching with
-`mpremote run`
+- Improve implementation
+- New effects
+- UI
+- Package into a Badgeware app. For now I'm just copying libraries and launching with
+  `mpremote run`
