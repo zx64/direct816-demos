@@ -97,6 +97,20 @@ state sharing.
 Theoretically the Direct8 conversion could also be assisted by the second core but since
 that code is pure C++, it would need more complex code to share with MicroPython.
 
+
+# 16-bit DMA for pixels
+
+The branch also fixes needing to perform endian conversion by the CPU for every pixel,
+even in the original modes.
+
+By reconfiguring the DMA and PIO to use 16-bit transfers for pixel data, we avoid needing
+to perform any endian swapping.
+
+I had originally thought I'd need to use
+[`channel_config_set_bswap`](https://www.raspberrypi.com/documentation/pico-sdk/hardware.html#group_channel_config)
+to swap endianness during the transfer, however simply adjusting the transfer width and
+the PIO code accomplished the desired outcome.
+
 # TODO
 - Improve implementation
 - New effects
