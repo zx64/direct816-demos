@@ -99,7 +99,6 @@ that code is pure C++, it would need more complex code to share with MicroPython
 
 
 # 16-bit DMA for pixels
-
 The branch also fixes needing to perform endian conversion by the CPU for every pixel,
 even in the original modes.
 
@@ -112,8 +111,15 @@ to swap endianness during the transfer, however simply adjusting the transfer wi
 the PIO code accomplished the desired outcome.
 
 # TODO
+For [the branch](https://github.com/zx64/tufty2350):
+- Enable CI and publish preview releases for convenience
 - Improve implementation
+- Investigate adapting existing drawing libraries like PicoGraphics and PicoVector
+
+For the demos:
+- Tidy up code duplication between the two testbeds
 - New effects
 - UI
 - Package into a Badgeware app. For now I'm just copying libraries and launching with
   `mpremote run`
+- Build script for CI and releases
