@@ -119,7 +119,8 @@ For [the branch](https://github.com/zx64/tufty2350):
 For the demos:
 - Tidy up code duplication between the two testbeds
 - New effects
-- UI
+- Use Tufty2350's buttons to cycle through effects
 - Package into a Badgeware app. For now I'm just copying libraries and launching with
   `mpremote run`
 - Build script for CI and releases
+- Preview screenshots and videos
