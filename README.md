@@ -114,7 +114,14 @@ the PIO code accomplished the desired outcome.
 For [the branch](https://github.com/zx64/tufty2350):
 - Enable CI and publish preview releases for convenience
 - Improve implementation
+- More palette operations: write to subset, rotate inside subset
+    - Maybe implement buffer protocol for palettes?
+    - Fades to white/black would be convenient but can be precalculated
+- Palette conversion can be performed inside the DMA transfer to the display, which avoids
+  needing to write back to memory.
+    - This gets a lot more complex once layers enter the picture
 - Investigate adapting existing drawing libraries like PicoGraphics and PicoVector
+- Investigate what can be accelerated with the interpolator hardware
 
 For the demos:
 - Tidy up code duplication between the two testbeds
