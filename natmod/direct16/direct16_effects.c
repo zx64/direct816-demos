@@ -29,9 +29,9 @@ static mp_obj_t set_display(mp_obj_t new_display_obj)
     mp_buffer_info_t tmp;
     mp_get_buffer_raise(new_display_obj, &tmp, MP_BUFFER_READ);
     //mp_printf(MP_PYTHON_PRINTER, "buf info: len %u typecode %c\n", tmp.len, tmp.typecode);
-    if (tmp.typecode != 'B')
+    if (tmp.typecode != 'H')
     {
-        mp_raise_ValueError(MP_ERROR_TEXT("Display framebuffer must be of type uint8 (B)"));
+        mp_raise_ValueError(MP_ERROR_TEXT("Display framebuffer must be of type uint16 (H)"));
     }
     if (tmp.len != FRAMEWIDTH * FRAMEHEIGHT * sizeof(uint16_t))
     {

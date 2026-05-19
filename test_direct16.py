@@ -17,7 +17,7 @@ HALF_HEIGHT = const(HEIGHT // 2)
 SIZE = const(WIDTH * HEIGHT)
 HALF_SIZE = const(SIZE // 2)
 effect_duration = const(511)
-assert len(memoryview(display)) == SIZE * 2
+assert len(memoryview(display)) == SIZE
 
 
 # Names for the index into the shared array
