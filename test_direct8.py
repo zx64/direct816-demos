@@ -10,6 +10,8 @@ from time import ticks_us
 update = display.update
 dual_layer = const(0)
 use_pio = const(0)
+no_prepare = const(1)
+no_overlay = const(1)
 if use_pio:
     assert hasattr(display, "direct8_pio")
 assert (
@@ -163,7 +165,7 @@ try:
 except ImportError:
     pass
 
-if use_pio:
+if use_pio or no_prepare:
 
     def overlay(t):
         pass
@@ -173,18 +175,23 @@ if use_pio:
 else:
     prepare = display.direct8_prepare
 
-    try:
-        import _direct8_effects
-        from _direct8_effects import overlay
-    except ImportError:
+    if no_overlay:
 
-        @micropython.viper
-        def overlay(t: uint):
-            fb = ptr16(display)
+        def overlay(t):
+            pass
+    else:
+        try:
+            import _direct8_effects
+            from _direct8_effects import overlay
+        except ImportError:
 
-            for idx in range(240 * 32):
-                fb[idx] >>= 1
-                fb[idx] &= 0b01111_011111_01111
+            @micropython.viper
+            def overlay(t: uint):
+                fb = ptr16(display)
+
+                for idx in range(240 * 32):
+                    fb[idx] >>= 1
+                    fb[idx] &= 0b01111_011111_01111
 
 
 drawfuncs.extend([("viper: palcycle", palcycle), ("viper: simple_xor", simple_xor)])
