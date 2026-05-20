@@ -149,18 +149,20 @@ try:
             ["palcycle", "simplexor", "xor_scroll", "plasma_scroll", "random_noise"],
         )
     )
+
+    from _direct8_effects import overlay
 except ImportError:
-    pass
+
+    @micropython.viper
+    def overlay():
+        fb = ptr16(display)
+
+        for idx in range(240 * 32):
+            fb[idx] >>= 1
+            fb[idx] &= 0b01111_011111_01111
+
 
 drawfuncs.extend([("viper: palcycle", palcycle), ("viper: simple_xor", simple_xor)])
-
-@micropython.viper
-def overlay():
-    fb = ptr16(display)
-
-    for idx in range(240 * 32):
-        fb[idx] >>= 1
-        fb[idx] &= 0b01111_011111_01111
 
 
 def main(drawfuncs):
