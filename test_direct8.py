@@ -10,8 +10,8 @@ from time import ticks_us
 update = display.update
 dual_layer = const(0)
 use_pio = const(0)
-no_prepare = const(1)
-no_overlay = const(1)
+use_prepare = const(1)
+use_overlay = const(1)
 if use_pio:
     assert hasattr(display, "direct8_pio")
 assert (
@@ -165,7 +165,7 @@ try:
 except ImportError:
     pass
 
-if use_pio or no_prepare:
+if use_pio or not use_prepare:
 
     def overlay(t):
         pass
@@ -175,7 +175,7 @@ if use_pio or no_prepare:
 else:
     prepare = display.direct8_prepare
 
-    if no_overlay:
+    if not use_overlay:
 
         def overlay(t):
             pass
