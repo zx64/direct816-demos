@@ -111,23 +111,38 @@ to swap endianness during the transfer, however simply adjusting the transfer wi
 the PIO code accomplished the desired outcome.
 
 # TODO
-For [the branch](https://github.com/zx64/tufty2350):
-- Enable CI and publish preview releases for convenience
-- Improve implementation
+## For [the branch](https://github.com/zx64/tufty2350):
+- Start tagging versions to be handled as releases by GitHub for easier downloading
+- Update the ci/micropython.sh script to fetch the latest version of the (eventual) app
+  from this repository so it can be included in the `tufty-with-filesystem.uf2` releases.
+- Investigate adapting existing drawing libraries like PicoGraphics and PicoVector
+- Investigate what can be accelerated with the interpolator hardware
+### Direct8 specific:
 - More palette operations: write to subset, rotate inside subset
     - Maybe implement buffer protocol for palettes?
     - Fades to white/black would be convenient but can be precalculated
 - Palette conversion can be performed inside the DMA transfer to the display, which avoids
   needing to write back to memory.
     - This gets a lot more complex once layers enter the picture
-- Investigate adapting existing drawing libraries like PicoGraphics and PicoVector
-- Investigate what can be accelerated with the interpolator hardware
+- Alternatively, it might be useful to able to perform some final processing on the merged
+  and converted framebuffer before sending it out to the display.
+  - While colour operations on RGB565 are difficult without multiple instructions to
+    unpack and repack the colour channels, you can half the brightness of a value with
+    just a left shift and masking off the highest bit of each colour: `(v >> 1) & 0b01111_011111_01111`
+  - Other bitlevel hacks might be possible?
+  - Allowing that process to be explicitly invoked from user code provides a way for the
+    conversion step to run on both cores without the driver having to care about how it.
 
-For the demos:
+## For this repository and the demos:
 - Tidy up code duplication between the two testbeds
-- New effects
+- Document how I'm using `_thread`
+- Add a way for two layer effects to be specified
+- Add an optional state update function to effects that happens before drawing
 - Use Tufty2350's buttons to cycle through effects
+- Add a menu for effects like the [existing effects demo](https://github.com/pimoroni/tufty2350/tree/main/firmware/apps/demos)
+- Add title cards for each effect
 - Package into a Badgeware app. For now I'm just copying libraries and launching with
   `mpremote run`
 - Build script for CI and releases
+- New effects
 - Preview screenshots and videos
