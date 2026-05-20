@@ -127,6 +127,9 @@ the PIO code accomplished the desired outcome.
   from this repository so it can be included in the `tufty-with-filesystem.uf2` releases.
 - Investigate adapting existing drawing libraries like PicoGraphics and PicoVector
 - Investigate what can be accelerated with the interpolator hardware
+- Measure time spent waiting for DMA and vsync so it can be accounted for when profiling
+  from user code
+
 ### Direct8 specific:
 - More palette operations: write to subset, rotate inside subset
     - Maybe implement buffer protocol for palettes?
