@@ -87,7 +87,7 @@ By default, the driver will perform the layer merging and colour conversion insi
 However, if your frame generation gets especially complex, the cost of this operation will
 become apparent.
 
-The user code can explicitly invoke `display.direct8_prepare()` once the indexed drawing
+The user code can explicitly invoke `display.direct8_prepare(-1)` once the indexed drawing
 operations have completed, giving an opportunity to perform post-processing.
 
 Additionally, the work can be shared between the two cores with a parameter indicating if

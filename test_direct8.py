@@ -184,7 +184,7 @@ def main(drawfuncs):
             if t[SHARED_TICK] != last_t:
                 last_t = t[SHARED_TICK]
                 drawfunc(last_t, HALF_HEIGHT)
-                display.direct8_prepare(True)
+                display.direct8_prepare(1)
             lock.release()
 
     df_name, drawfunc = drawfuncs[t[SHARED_DRAWIDX]]
@@ -197,7 +197,7 @@ def main(drawfuncs):
     while True:
         start = ticks_us()
         drawfunc(t[SHARED_TICK], 0)
-        display.direct8_prepare(False)
+        display.direct8_prepare(0)
         lock.acquire()
         overlay()
         draw_duration += ticks_us() - start
