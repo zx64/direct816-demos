@@ -10,13 +10,16 @@ from time import ticks_us
 update = display.update
 dual_layer = const(0)
 use_pio = const(0)
+if use_pio:
+    assert hasattr(display, "direct8_pio")
 assert (
     (use_pio and not dual_layer)
     or (dual_layer and not use_pio)
     or (not dual_layer and not use_pio)
 )
 display.direct8(True, dual_layer)  # requires changes made locally
-display.direct8_pio(use_pio)
+if use_pio:
+    display.direct8_pio(use_pio)
 display.direct8_palette(direct16_effects.palette, 0)
 if dual_layer:
     from direct16_effects import bgr565
