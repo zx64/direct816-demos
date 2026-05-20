@@ -8,8 +8,15 @@ from array import array
 from time import ticks_us
 
 update = display.update
-dual_layer = const(1)
+dual_layer = const(0)
+use_pio = const(0)
+assert (
+    (use_pio and not dual_layer)
+    or (dual_layer and not use_pio)
+    or (not dual_layer and not use_pio)
+)
 display.direct8(True, dual_layer)  # requires changes made locally
+display.direct8_pio(use_pio)
 display.direct8_palette(direct16_effects.palette, 0)
 if dual_layer:
     from direct16_effects import bgr565
@@ -150,16 +157,31 @@ try:
         )
     )
 
-    from _direct8_effects import overlay
 except ImportError:
+    pass
 
-    @micropython.viper
-    def overlay(t: uint):
-        fb = ptr16(display)
+if use_pio:
 
-        for idx in range(240 * 32):
-            fb[idx] >>= 1
-            fb[idx] &= 0b01111_011111_01111
+    def overlay(t):
+        pass
+
+    def prepare(t):
+        pass
+else:
+    prepare = display.direct8_prepare
+
+    try:
+        import _direct8_effects
+        from _direct8_effects import overlay
+    except ImportError:
+
+        @micropython.viper
+        def overlay(t: uint):
+            fb = ptr16(display)
+
+            for idx in range(240 * 32):
+                fb[idx] >>= 1
+                fb[idx] &= 0b01111_011111_01111
 
 
 drawfuncs.extend([("viper: palcycle", palcycle), ("viper: simple_xor", simple_xor)])
@@ -186,7 +208,7 @@ def main(drawfuncs):
             if t[SHARED_TICK] != last_t:
                 last_t = t[SHARED_TICK]
                 drawfunc(last_t, HALF_HEIGHT)
-                display.direct8_prepare(1)
+                prepare(1)
             lock.release()
 
     df_name, drawfunc = drawfuncs[t[SHARED_DRAWIDX]]
@@ -199,7 +221,7 @@ def main(drawfuncs):
     while True:
         start = ticks_us()
         drawfunc(t[SHARED_TICK], 0)
-        display.direct8_prepare(0)
+        prepare(0)
         lock.acquire()
         overlay(t[SHARED_TICK])
         draw_duration += ticks_us() - start
