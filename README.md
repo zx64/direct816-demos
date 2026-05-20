@@ -10,7 +10,7 @@ Tested with [ARM GCC 15.2](https://developer.arm.com/downloads/-/arm-gnu-toolcha
 The [existing graphics APIs](https://badgewa.re/docs) included in the Tufty2350 firmware
 are very approachable and have other benefits like easy porting between the other badges,
 [a simulator](http://github.com/pimoroni/badgeware-simulator) and even runnable examples
-inside the documentation using a WASM port.
+inside the documentation using a [WASM port](https://github.com/pimoroni/badgeware-web/).
 
 The existing driver converts from 32-bit RGB888 landscape to 16-bit RGB565 portrait every
 update, which is great if you don't want to care about handling that but you can get
