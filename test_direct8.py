@@ -154,6 +154,14 @@ except ImportError:
 
 drawfuncs.extend([("viper: palcycle", palcycle), ("viper: simple_xor", simple_xor)])
 
+@micropython.viper
+def overlay():
+    fb = ptr16(display)
+
+    for idx in range(240 * 32):
+        fb[idx] >>= 1
+        fb[idx] &= 0b01111_011111_01111
+
 
 def main(drawfuncs):
     import _thread
@@ -176,6 +184,7 @@ def main(drawfuncs):
             if t[SHARED_TICK] != last_t:
                 last_t = t[SHARED_TICK]
                 drawfunc(last_t, HALF_HEIGHT)
+                display.direct8_prepare(True)
             lock.release()
 
     df_name, drawfunc = drawfuncs[t[SHARED_DRAWIDX]]
@@ -188,7 +197,9 @@ def main(drawfuncs):
     while True:
         start = ticks_us()
         drawfunc(t[SHARED_TICK], 0)
+        display.direct8_prepare(False)
         lock.acquire()
+        overlay()
         draw_duration += ticks_us() - start
         draw_duration >>= 1
         if done:
