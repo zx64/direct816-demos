@@ -63,9 +63,6 @@ Unlike Direct16, the framebuffers you access remain in the same place and are no
 by the display driver. This allows you to perform partial drawing as well as palette
 cycling with minimal overhead.
 
-The layer merging and RGB565 conversion is performed before waiting for vertical sync, so
-it's effectively free if you finish frames fast enough.
-
 Since each pixel is now only one byte, you get further speedups when drawing. Fills and
 vertical lines can be done four pixels at a time with 32-bit writes.
 
@@ -83,6 +80,19 @@ entries with black.
 Further features could include specifying the range to update or having the native code
 rotate a subset.
 
+### Frame Preparation
+By default, the driver will perform the layer merging and colour conversion inside
+`display.update()` during time usually spent waiting for vertical sync.
+
+However, if your frame generation gets especially complex, the cost of this operation will
+become apparent.
+
+The user code can explicitly invoke `display.direct8_prepare()` once the indexed drawing
+operations have completed, giving an opportunity to perform post-processing.
+
+Additionally, the work can be shared between the two cores with a parameter indicating if
+this is being run from the second core or not.
+
 
 # Multicore support
 I have re-enabled the [`_thread` module](https://docs.micropython.org/en/latest/library/_thread.html) which allows for the second core to assist with drawing from MicroPython.
@@ -94,8 +104,8 @@ The multi-threading in the demos isn't especially sophisticated: each core is gi
 the framebuffer to draw from a shared tick. This avoids having to implement more complex
 state sharing.
 
-Theoretically the Direct8 conversion could also be assisted by the second core but since
-that code is pure C++, it would need more complex code to share with MicroPython.
+Direct8's conversion to RGB565 can be shared between the two cores, but requires the user
+code to coordinate scheduling and synchronisation.
 
 
 # 16-bit DMA for pixels
@@ -121,17 +131,9 @@ the PIO code accomplished the desired outcome.
 - More palette operations: write to subset, rotate inside subset
     - Maybe implement buffer protocol for palettes?
     - Fades to white/black would be convenient but can be precalculated
-- Palette conversion can be performed inside the DMA transfer to the display, which avoids
-  needing to write back to memory.
+- Palette conversion can be performed inside the DMA transfer to the display with the help
+  of some PIO tricks, which avoids needing to write back to memory.
     - This gets a lot more complex once layers enter the picture
-- Alternatively, it might be useful to able to perform some final processing on the merged
-  and converted framebuffer before sending it out to the display.
-  - While colour operations on RGB565 are difficult without multiple instructions to
-    unpack and repack the colour channels, you can half the brightness of a value with
-    just a left shift and masking off the highest bit of each colour: `(v >> 1) & 0b01111_011111_01111`
-  - Other bitlevel hacks might be possible?
-  - Allowing that process to be explicitly invoked from user code provides a way for the
-    conversion step to run on both cores without the driver having to care about how it.
 
 ## For this repository and the demos:
 - Tidy up code duplication between the two testbeds
