@@ -154,7 +154,7 @@ try:
 except ImportError:
 
     @micropython.viper
-    def overlay():
+    def overlay(t: uint):
         fb = ptr16(display)
 
         for idx in range(240 * 32):
@@ -201,7 +201,7 @@ def main(drawfuncs):
         drawfunc(t[SHARED_TICK], 0)
         display.direct8_prepare(0)
         lock.acquire()
-        overlay()
+        overlay(t[SHARED_TICK])
         draw_duration += ticks_us() - start
         draw_duration >>= 1
         if done:

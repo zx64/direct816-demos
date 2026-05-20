@@ -324,7 +324,7 @@ static mp_obj_t l1_plasma_scroll(mp_obj_t tick_obj, mp_obj_t y_start_obj)
 }
 static MP_DEFINE_CONST_FUN_OBJ_2(l1_plasma_scroll_obj, l1_plasma_scroll);
 
-static mp_obj_t overlay()
+static mp_obj_t overlay(mp_obj_t tick_obj)
 {
     if (!display_obj)
     {
@@ -338,10 +338,12 @@ static mp_obj_t overlay()
         mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Prepare has not been called this frame"));
     }
     uint16_t* fb = (uint16_t*)tmp.buf;
+    uint16_t tick = mp_obj_get_int(tick_obj) % FRAMEWIDTH;
+    (void)tick;
 
     for (uint16_t y = 0; y < FRAMEHEIGHT; ++y)
     {
-        for (uint16_t x = 0; x < 32; ++x)
+        for (uint16_t x = 0; x < tick; ++x)
         {
             *fb >>= 1;
             *fb++ &= 0b0111101111101111;
@@ -350,7 +352,7 @@ static mp_obj_t overlay()
 
     return mp_const_none;
 }
-static MP_DEFINE_CONST_FUN_OBJ_0(overlay_obj, overlay);
+static MP_DEFINE_CONST_FUN_OBJ_1(overlay_obj, overlay);
 
 
 mp_obj_t mpy_init(mp_obj_fun_bc_t *self, size_t n_args, size_t n_kw, mp_obj_t *args)
