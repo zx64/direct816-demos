@@ -93,6 +93,7 @@ def main(drawfuncs):
     print(f"{df_name}")
     draw_duration = 0
     present_duration = 0
+    present_wait_duration = 0
     _thread.start_new_thread(threadfunc, (t,))
     done = False
 
@@ -109,22 +110,29 @@ def main(drawfuncs):
         t[SHARED_TICK] += 1
 
         start = ticks_us()
-        update()
-        present_duration += ticks_us() - start
+        present_wait = update()
+        present_wait_duration += present_wait
+        present_wait_duration >>= 1
+        present_duration += ticks_us() - start - present_wait
         present_duration >>= 1
 
         if t[SHARED_TICK] & effect_duration == 0:
             new_idx = t[SHARED_DRAWIDX] = (t[SHARED_DRAWIDX] + 1) % len(drawfuncs)
             df_name, drawfunc = drawfuncs[new_idx]
-            print(f"avg draw: {draw_duration:<10} avg present: {present_duration}")
+            print(
+                f"draw: {draw_duration:<10} wait: {present_wait_duration:<10} present: {present_duration}"
+            )
             print(f"{df_name}")
             draw_duration = 0
+            present_wait_duration = 0
             present_duration = 0
 
         lock.release()
         if t[SHARED_TICK] & 31 == 0:
             if draw_duration > 0:
-                print(f"avg draw: {draw_duration:<10} avg present: {present_duration}")
+                print(
+                    f"draw: {draw_duration:<10} wait: {present_wait_duration:<10} present: {present_duration}"
+                )
             gc.collect()
 
 
