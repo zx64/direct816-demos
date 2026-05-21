@@ -13,14 +13,17 @@ are very approachable and have other benefits like easy porting between the othe
 inside the documentation using a [WASM port](https://github.com/pimoroni/badgeware-web/).
 
 The existing driver converts from 32-bit RGB888 landscape to 16-bit RGB565 portrait every
-update, which is great if you don't want to care about handling that but you can get
-increased performance if you're willing to deal with these steps yourself.
+update, which makes it easier to focus on getting cool stuff on screen but you can get
+increased performance if you're willing to handle the extra complexity.
 
 While the ST7789 is able to rotate pixel data given to it, it is unable to do so without
 introducing an ugly diagonal tear line, even if you are perfectly syncing with its vsync
 signal.
 
 My branch adds two modes to the ST7789 driver: Direct 8 and Direct 16.
+
+(Direct8 grew out of me using palettes to simplify my testing of Direct16 and figured I
+might as well implement an 8-bit mode as a convenience feature in the driver)
 
 ## Direct16
 Enable with `display.direct16(True)`
@@ -88,11 +91,24 @@ However, if your frame generation gets especially complex, the cost of this oper
 become apparent.
 
 The user code can explicitly invoke `display.direct8_prepare(-1)` once the indexed drawing
-operations have completed, giving an opportunity to perform post-processing.
+operations have completed, giving an opportunity to perform post-processing outside of the
+existing palettes.
 
 Additionally, the work can be shared between the two cores with a parameter indicating if
 this is being run from the second core or not.
 
+### One layer or two?
+Adding a second layer adds more overhead than just implementing layering in one layer, but
+it has some unique features that might be a good tradeoff:
+
+You can have separate palettes for the two layers, which allows for higher quality
+backgrounds and layer specific palette cycling effects.
+
+Layers do not have to be fully redrawn every frame in Direct8.
+If you have a static background, you can draw that once and then your sprite drawing code
+for the second layer only has to clear to zero to undraw a pixel rather than having to
+sample from the background.
+A static background can still be animated with palette cycling.
 
 # Multicore support
 I have re-enabled the [`_thread` module](https://docs.micropython.org/en/latest/library/_thread.html) which allows for the second core to assist with drawing from MicroPython.
@@ -127,8 +143,6 @@ the PIO code accomplished the desired outcome.
   from this repository so it can be included in the `tufty-with-filesystem.uf2` releases.
 - Investigate adapting existing drawing libraries like PicoGraphics and PicoVector
 - Investigate what can be accelerated with the interpolator hardware
-- Measure time spent waiting for DMA and vsync so it can be accounted for when profiling
-  from user code
 
 ### Direct8 specific:
 - More palette operations: write to subset, rotate inside subset
@@ -137,6 +151,9 @@ the PIO code accomplished the desired outcome.
 - Palette conversion can be performed inside the DMA transfer to the display with the help
   of some PIO tricks, which avoids needing to write back to memory.
     - This gets a lot more complex once layers enter the picture
+    - In progress on another branch, but inital results seem close to doing this work on
+      the CPU and thus a less exciting prospect than when I first got it working on the
+      original Tufty2040.
 
 ## For this repository and the demos:
 - Tidy up code duplication between the two testbeds
