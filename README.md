@@ -172,6 +172,7 @@ the PIO code accomplished the desired outcome.
 - New effects
 - Preview screenshots and videos
 - Tools to prepare images and palettes
+- Make boot button exit to bootloader
 
 # More rambling that I felt needed writing down somewhere
 There is potential for some further improvements with more intrusive changes to the ST7789
