@@ -5,6 +5,9 @@ My version of Tufty2350 and the native modules here are built against my [branch
 
 Tested with [ARM GCC 15.2](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads)
 
+I wouldn't call the following documentation yet, it's mostly a braindump of "Oh I should
+mention that" while I think through the scope and API for this.
+
 
 # Direct816?
 The [existing graphics APIs](https://badgewa.re/docs) included in the Tufty2350 firmware
