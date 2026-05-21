@@ -168,3 +168,4 @@ the PIO code accomplished the desired outcome.
 - Build script for CI and releases
 - New effects
 - Preview screenshots and videos
+- Tools to prepare images and palettes
