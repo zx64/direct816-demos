@@ -172,3 +172,22 @@ the PIO code accomplished the desired outcome.
 - New effects
 - Preview screenshots and videos
 - Tools to prepare images and palettes
+
+# More rambling that I felt needed writing down somewhere
+There is potential for some further improvements with more intrusive changes to the ST7789
+driver to take into account the specifics of the RP2350 bus fabric (section 2.1 of the
+RP2350 datasheet), for example the framebuffers could be stored in separate parts of SRAM
+so the two cores and DMA are less likely to conflict.
+
+I'm ruling that out of scope as I want these changes to exist alongside the existing
+firmware.
+
+A fully native program will have less overhead, but I'm pleasantly surprised by what you
+can get out of MicroPython and its simplicity helps with the code outside of the critical
+path.
+
+I'd like to eventually change how MicroPython native modules are built so it's less clunky
+on Windows, supports C++ and can use some Pico SDK features. But I already have plenty on
+that list above so unlikely to happen.
+
+Linus Akesson's post about his 2025 demo [Kaleidoscopico](https://www.linusakesson.net/scene/kaleidoscopico/index.php) is great reading and talks about his 12-bit palette implementation.
