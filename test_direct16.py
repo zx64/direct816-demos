@@ -120,7 +120,7 @@ def main(drawfuncs):
             new_idx = t[SHARED_DRAWIDX] = (t[SHARED_DRAWIDX] + 1) % len(drawfuncs)
             df_name, drawfunc = drawfuncs[new_idx]
             print(
-                f"draw: {draw_duration:<10} wait: {present_wait_duration:<10} present: {present_duration}"
+                f"draw: {draw_duration:<10} dma+vsync: {present_wait_duration:<10} present: {present_duration}"
             )
             print(f"{df_name}")
             draw_duration = 0
@@ -131,7 +131,7 @@ def main(drawfuncs):
         if t[SHARED_TICK] & 31 == 0:
             if draw_duration > 0:
                 print(
-                    f"draw: {draw_duration:<10} wait: {present_wait_duration:<10} present: {present_duration}"
+                    f"draw: {draw_duration:<10} dma+vsync: {present_wait_duration:<10} present: {present_duration}"
                 )
             gc.collect()
 
