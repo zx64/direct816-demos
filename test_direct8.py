@@ -11,7 +11,7 @@ update = display.update
 dual_layer = const(0)
 use_pio = const(0)
 use_prepare = const(1)
-use_overlay = const(1)
+use_overlay = const(0)
 if use_pio:
     assert hasattr(display, "direct8_pio")
 assert (
@@ -171,7 +171,7 @@ if use_pio or not use_prepare:
         pass
 
     def prepare(t):
-        pass
+        return 0
 else:
     prepare = display.direct8_prepare
 
@@ -225,13 +225,20 @@ def main(drawfuncs):
     print(f"{df_name}")
     draw_duration = 0
     present_duration = 0
+    prepare_blit = 0
+    prepare_dma_wait = 0
     _thread.start_new_thread(threadfunc, (t,))
     done = False
 
     while True:
         start = ticks_us()
         drawfunc(t[SHARED_TICK], 0)
-        prepare(0)
+        prep_start = ticks_us()
+        dma_wait = prepare(0)
+        prepare_blit += ticks_us() - prep_start - dma_wait
+        prepare_blit >>= 1
+        prepare_dma_wait += dma_wait
+        prepare_dma_wait >>= 1
         lock.acquire()
         overlay(t[SHARED_TICK])
         draw_duration += ticks_us() - start
@@ -250,15 +257,23 @@ def main(drawfuncs):
         if t[SHARED_TICK] & effect_duration == 0:
             new_idx = t[SHARED_DRAWIDX] = (t[SHARED_DRAWIDX] + 1) % len(drawfuncs)
             df_name, drawfunc = drawfuncs[new_idx]
-            print(f"avg draw: {draw_duration:<10} avg present: {present_duration}")
+            draw_only = draw_duration - prepare_blit - prepare_dma_wait
+            print(
+                f"draw: {draw_only:<10} prepare: {prepare_blit:<10} dma stall: {prepare_dma_wait:<10} present: {present_duration}"
+            )
             print(f"{df_name}")
             draw_duration = 0
+            prepare_blit = 0
             present_duration = 0
+            prepare_dma_wait = 0
 
         lock.release()
         if t[SHARED_TICK] & 31 == 0:
             if draw_duration > 0:
-                print(f"avg draw: {draw_duration:<10} avg present: {present_duration}")
+                draw_only = draw_duration - prepare_blit - prepare_dma_wait
+                print(
+                    f"draw: {draw_only:<10} prepare: {prepare_blit:<10} dma stall: {prepare_dma_wait:<10} present: {present_duration}"
+                )
             gc.collect()
 
 
