@@ -224,6 +224,7 @@ def main(drawfuncs):
     df_name, drawfunc = drawfuncs[t[SHARED_DRAWIDX]]
     print(f"{df_name}")
     draw_duration = 0
+    present_wait_duration = 0
     present_duration = 0
     prepare_blit = 0
     prepare_dma_wait = 0
@@ -250,8 +251,10 @@ def main(drawfuncs):
         t[SHARED_TICK] += 1
 
         start = ticks_us()
-        update()
-        present_duration += ticks_us() - start
+        present_wait = update()
+        present_wait_duration += present_wait
+        present_wait_duration >>= 1
+        present_duration += ticks_us() - start - present_wait
         present_duration >>= 1
 
         if t[SHARED_TICK] & effect_duration == 0:
@@ -259,7 +262,7 @@ def main(drawfuncs):
             df_name, drawfunc = drawfuncs[new_idx]
             draw_only = draw_duration - prepare_blit - prepare_dma_wait
             print(
-                f"draw: {draw_only:<10} prepare: {prepare_blit:<10} dma stall: {prepare_dma_wait:<10} present: {present_duration}"
+                f"draw: {draw_only:<10} prepare: {prepare_blit:<10} dma stall: {prepare_dma_wait:<10} vsync: {present_wait_duration:<10} present: {present_duration}"
             )
             print(f"{df_name}")
             draw_duration = 0
@@ -272,7 +275,7 @@ def main(drawfuncs):
             if draw_duration > 0:
                 draw_only = draw_duration - prepare_blit - prepare_dma_wait
                 print(
-                    f"draw: {draw_only:<10} prepare: {prepare_blit:<10} dma stall: {prepare_dma_wait:<10} present: {present_duration}"
+                    f"draw: {draw_only:<10} prepare: {prepare_blit:<10} dma stall: {prepare_dma_wait:<10} vsync: {present_wait_duration:<10} present: {present_duration}"
                 )
             gc.collect()
 
