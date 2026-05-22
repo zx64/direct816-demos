@@ -150,6 +150,7 @@ the PIO code accomplished the desired outcome.
 ### Direct8 specific:
 - More palette operations: write to subset, rotate inside subset
     - Maybe implement buffer protocol for palettes?
+       - Need to wait for DMA before the palette can be safely written
     - Fades to white/black would be convenient but can be precalculated
 - Palette conversion can be performed inside the DMA transfer to the display with the help
   of some PIO tricks, which avoids needing to write back to memory.
