@@ -61,6 +61,11 @@ def bgr565(r: uint, g: uint, b: uint) -> uint:
     # return b | a
 
 
+@micropython.viper
+def convert_888_565(src: uint) -> uint:
+    return (src & 0xF8) << 8 | (src & 0xFC00) >> 5 | (src & 0xF8_00_00) >> 19
+
+
 if 1:
     palette = array(
         "H",
@@ -71,6 +76,14 @@ else:
     palette = array("H", [bgr565(i, i // 4, i // 8) for i in range(256)])
 palmask = const(255)
 assert len(palette) == (palmask + 1)
+
+
+palette_hsv255 = array(
+    "H", [convert_888_565(color.hsv(360.0 * i / 255.0, 255, 255).p) for i in range(256)]
+)
+palette_hsv127 = array(
+    "H", [convert_888_565(color.hsv(360.0 * i / 255.0, 127, 255).p) for i in range(256)]
+)
 
 
 @micropython.viper
