@@ -9,6 +9,8 @@ FRAME_WIDTH = const(240)
 FRAME_HEIGHT = const(320)
 
 
+# TODO: This version uses 150K of temporary storage, but you can use less:
+# https://en.wikipedia.org/wiki/In-place_matrix_transposition
 @micropython.viper
 def _copyconv(temp_output):
     rgb888 = ptr32(display)
