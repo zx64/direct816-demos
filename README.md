@@ -147,6 +147,11 @@ the PIO code accomplished the desired outcome.
 - Investigate adapting existing drawing libraries like PicoGraphics and PicoVector
     - PicoVector might just need some custom brush and colour classes to output in the
       right format and coordinates.
+    - Critical problem is Direct16 alternates between halves of the framebuffer which
+      PicoVector is unaware of.
+    - A less intrusive change could be only using PicoVector to draw to offscreen
+      textures. This would still benefit from having native transposed drawing and RGB565
+      conversion.
 - Investigate what can be accelerated with the interpolator hardware
 
 ### Direct8 specific:
