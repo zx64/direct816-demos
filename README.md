@@ -180,6 +180,11 @@ the PIO code accomplished the desired outcome.
   `mpremote run`
 - Build script for CI and releases
 - New effects
+    - I'd like to implement various 80s-90s demo effects
+    - Remake the [world demo](https://github.com/pimoroni/tufty2350/tree/main/firmware/apps/demos/demos/world.py)
+    - [ST-NICCC](https://www.pouet.net/prod.php?which=1251) is a classic precalculated
+      polygon animation that has been ported to a lot of platforms. Not quite at the same
+      level as Bad Apple or Doom but either way, should look great on Tufty's display.
 - Preview screenshots and videos
 - Tools to prepare images and palettes
 - Make boot button exit to bootloader
