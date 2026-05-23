@@ -145,6 +145,8 @@ the PIO code accomplished the desired outcome.
 - Update the ci/micropython.sh script to fetch the latest version of the (eventual) app
   from this repository so it can be included in the `tufty-with-filesystem.uf2` releases.
 - Investigate adapting existing drawing libraries like PicoGraphics and PicoVector
+    - PicoVector might just need some custom brush and colour classes to output in the
+      right format and coordinates.
 - Investigate what can be accelerated with the interpolator hardware
 
 ### Direct8 specific:
