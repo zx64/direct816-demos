@@ -1,5 +1,10 @@
 import direct16_effects
-from direct16_effects import palette_hsv255 as pal
+
+# Precache brush instances
+pal = []
+for i in range(256):
+    screen.pen = direct16_effects.palette_hsv255[i]
+    pal.append(screen.pen)
 
 badge.mode(HIRES | VSYNC)
 display.direct16(True)
