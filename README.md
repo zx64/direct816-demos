@@ -202,4 +202,5 @@ on Windows, supports C++ and can use some Pico SDK features. But I already have 
 that list above so unlikely to happen.
 
 Linus Akesson's post about his 2025 demo [Kaleidoscopico](https://www.linusakesson.net/scene/kaleidoscopico/index.php) is great reading and talks about his 12-bit palette implementation.
+
 He is also working on a technical video about his 2026 demo [Sum Ergo Demonstro](https://linusakesson.net/scene/sum-ergo-demonstro/index.php).
