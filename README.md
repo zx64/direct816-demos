@@ -152,6 +152,8 @@ the PIO code accomplished the desired outcome.
     - A less intrusive change could be only using PicoVector to draw to offscreen
       textures. This would still benefit from having native transposed drawing and RGB565
       conversion.
+    - Offline conversion would be better for load times but it is a nicer developer
+      experience to more easily port over bits of your drawing code.
 - Investigate what can be accelerated with the interpolator hardware
 
 ### Direct8 specific:
