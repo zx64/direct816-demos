@@ -157,6 +157,7 @@ the PIO code accomplished the desired outcome.
     - Offline conversion would be better for load times but it is a nicer developer
       experience to more easily port over bits of your drawing code.
 - Investigate what can be accelerated with the interpolator hardware
+- Extract common helper functions from the demos into new module(s)
 
 ### Direct8 specific:
 - More palette operations: write to subset, rotate inside subset
