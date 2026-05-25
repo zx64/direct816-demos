@@ -209,14 +209,15 @@ def palette_cycle_direct():
             gc.collect()
 
 
-if dual_layer:
-    # Only run this once to demonstrate non-destructive update
-    simple_xor(0, 0)
-    simple_xor(0, HALF_HEIGHT)
-    fill8_upper(0)
-    # main([("l1 checker", layer1_checker_scroll)])
-    main([("l1 plasma", _direct8_effects.l1_plasma_scroll)])
-# palette_cycle_direct()
-
-# main(get_drawfuncs(_direct8_effects, "native", ["xor_scroll", "plasma_scroll"]))
-main(drawfuncs)
+if __name__ == "__main__":
+    if dual_layer:
+        # Only run this once to demonstrate non-destructive update
+        simple_xor(0, 0)
+        simple_xor(0, HALF_HEIGHT)
+        fill8_upper(0)
+        # main([("l1 checker", layer1_checker_scroll)])
+        main([("l1 plasma", _direct8_effects.l1_plasma_scroll)])
+        # palette_cycle_direct()
+    else:
+        # main(get_drawfuncs(_direct8_effects, "native", ["xor_scroll", "plasma_scroll"]))
+        main(drawfuncs)

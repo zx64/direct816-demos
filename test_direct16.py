@@ -136,5 +136,6 @@ def main(drawfuncs):
             gc.collect()
 
 
-# main(get_drawfuncs(_direct16_effects, "native", ["xor_scroll", "plasma_scroll"]))
-main(drawfuncs)
+if __name__ == "__main__":
+    # main(get_drawfuncs(_direct16_effects, "native", ["xor_scroll", "plasma_scroll"]))
+    main(drawfuncs)
