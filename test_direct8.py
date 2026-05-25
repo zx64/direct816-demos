@@ -3,8 +3,10 @@
 # Dual layer support for drawfuncs
 import gc
 import micropython
-import direct16_effects
+import direct8_effects
 from array import array
+from common_effects import generate_palette, make_palette_cycle, x_scroll, y_scroll
+from common_effects import orange_cycle as palette
 from time import ticks_us
 
 update = display.update
@@ -22,15 +24,9 @@ assert (
 display.direct8(True, dual_layer)  # requires changes made locally
 if use_pio:
     display.direct8_pio(use_pio)
-display.direct8_palette(direct16_effects.palette, 0)
+display.direct8_palette(palette, 0)
 if dual_layer:
-    from direct16_effects import bgr565
-
-    l1_palette = array(
-        "H",
-        [bgr565(i // 8, i, i // 4) for i in range(0, 256, 2)]
-        + [bgr565(i // 8, i, i // 4) for i in range(255, 0, -2)],
-    )
+    l1_palette = make_palette_cycle(generate_palette(lambda i: (i // 8, i, i // 4)))
     display.direct8_palette(l1_palette, 1)
 
 # display.set_vsync(False)
@@ -38,101 +34,8 @@ WIDTH = const(240)
 HEIGHT = const(320)
 HALF_HEIGHT = const(HEIGHT // 2)
 SIZE = const(WIDTH * HEIGHT)
-HALF_SIZE = const(SIZE // 2)
-U32_SIZE = const(SIZE // 4)
-HALF_U32_SIZE = const(U32_SIZE // 2)
 effect_duration = const(511)
 assert len(memoryview(display)) == 2 * SIZE if dual_layer else SIZE
-
-
-@micropython.viper
-def fill8(c: uint):
-    fb32 = ptr32(display)
-    c = c & 0xFF
-    v32 = c << 24 | c << 16 | c << 8 | c
-    for idx in range(U32_SIZE):
-        fb32[idx] = v32
-
-
-if dual_layer:
-
-    @micropython.viper
-    def fill8_both_layers(c: uint):
-        fb32 = ptr32(display)
-        c = c & 0xFF
-        v32 = c << 24 | c << 16 | c << 8 | c
-        for idx in range(U32_SIZE * 2):
-            fb32[idx] = v32
-
-    @micropython.viper
-    def fill8_upper(c: uint):
-        fb32 = ptr32(display)
-        c = c & 0xFF
-        v32 = c << 24 | c << 16 | c << 8 | c
-        for idx in range(U32_SIZE, U32_SIZE * 2):
-            fb32[idx] = v32
-
-
-@micropython.viper
-def palcycle(t: uint, y_min: uint):
-    fb32 = ptr32(display)
-
-    if y_min == uint(0):
-        base = uint(0)
-    else:
-        base = uint(HALF_U32_SIZE)
-
-    c = t & 0xFF
-    v32 = c << 24 | c << 16 | c << 8 | c
-    for idx in range(base, base + HALF_U32_SIZE):
-        fb32[idx] = v32
-
-
-@micropython.viper
-def simple_xor(t: uint, y_min: uint):
-    fb = ptr8(display)
-
-    if y_min == uint(0):
-        idx = uint(0)
-    else:
-        idx = uint(HALF_SIZE)
-
-    for y in range(y_min, y_min + HALF_HEIGHT):
-        for x in range(WIDTH):
-            c = ((x ^ y) + t) & 0xFF
-            fb[idx] = c
-            idx += 1
-
-
-if dual_layer:
-    # Picking these makes the checker scroll line up nicely with the simple_xor background
-    SKIP_X = const(64)
-    SKIP_X2 = const(48)
-
-    @micropython.viper
-    def layer1_checker_scroll(t: uint, y_min: uint):
-        _direct8_effects.xor_scroll(t, y_min)
-        fb = ptr8(display)
-
-        if y_min == uint(0):
-            idx = uint(SIZE)
-        else:
-            idx = uint(SIZE + HALF_SIZE)
-
-        val = t & 0xFF
-        if val == uint(0):
-            val = uint(1)
-        for y in range(y_min, y_min + HALF_HEIGHT):
-            y1bit = uint(((y + t) >> 4) & 1)
-            idx += uint(SKIP_X)
-            for x in range(SKIP_X, WIDTH - SKIP_X2):
-                xbit = ((x - t) >> 4 & 1) ^ y1bit
-                if xbit:
-                    fb[idx] = val
-                else:
-                    fb[idx] = 0
-                idx += 1
-            idx += uint(SKIP_X2)
 
 
 # Names for the index into the shared array
@@ -151,9 +54,7 @@ try:
     import _direct8_effects
 
     _direct8_effects.set_display(display, dual_layer)
-    _direct8_effects.set_scroll_arrays(
-        direct16_effects.x_scroll, direct16_effects.y_scroll
-    )
+    _direct8_effects.set_scroll_arrays(x_scroll, y_scroll)
     drawfuncs.extend(
         get_drawfuncs(
             _direct8_effects,
@@ -194,7 +95,7 @@ else:
                     fb[idx] &= 0b01111_011111_01111
 
 
-drawfuncs.extend([("viper: palcycle", palcycle), ("viper: simple_xor", simple_xor)])
+drawfuncs.extend(get_drawfuncs(direct8_effects, "viper", ["palcycle", "simple_xor"]))
 
 
 def main(drawfuncs):
@@ -287,10 +188,10 @@ def palette_cycle_direct():
     draw_duration = 0
     present_duration = 0
     tick = 0
-    new_palette = array("H", [direct16_effects.palette[tick]])
+    new_palette = array("H", [palette[tick]])
     while True:
         start = ticks_us()
-        new_palette[0] = direct16_effects.palette[tick & 0xFF]
+        new_palette[0] = palette[tick & 0xFF]
         display.direct8_palette(new_palette)
         draw_duration += ticks_us() - start
         draw_duration >>= 1

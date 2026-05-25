@@ -1,6 +1,14 @@
 import math
 import micropython
 from array import array
+from common_effects import (
+    convert_palette,
+    generate_palette,
+    make_palette_cycle,
+    x_scroll,
+    y_scroll,
+)
+from common_effects import orange_cycle as palette
 
 WIDTH = const(240)
 HEIGHT = const(320)
@@ -9,31 +17,12 @@ SIZE = const(WIDTH * HEIGHT)
 HALF_SIZE = const(SIZE // 2)
 QUARTER_SIZE = const(SIZE // 4)
 
+
 angle_bits = const(10)
 angle_len = const(1 << angle_bits)
 angle_mask = const(angle_len - 1)
-orbit_radius = const(800)
 
-
-def mapped_angle(angle):
-    return math.radians(360.0 * angle / angle_mask)
-
-
-x_scroll = array(
-    "I",
-    [
-        math.floor(math.sin(mapped_angle(theta)) * orbit_radius)
-        for theta in range(angle_len)
-    ],
-)
-
-y_scroll = array(
-    "I",
-    [
-        math.floor(math.cos(mapped_angle(2.0 * theta)) * orbit_radius)
-        for theta in range(angle_len)
-    ],
-)
+palmask = const(255)
 
 
 @micropython.viper
@@ -43,47 +32,6 @@ def fill_565(v: uint):
     fb32 = ptr32(display)
     for idx in range(HALF_SIZE):
         fb32[idx] = v32
-
-
-@micropython.viper
-def byteswap16(v: uint) -> uint:
-    a = (v & 0xFF00) >> 8
-    b = (v & 0x00FF) << 8
-    return b | a
-
-
-@micropython.viper
-def bgr565(r: uint, g: uint, b: uint) -> uint:
-    v = ((r & 0b11111000) << 8 | (g & 0b11111100) << 3 | b >> 3) & 0xFFFF
-    return v
-    # a = (v & 0xFF00) >> 8
-    # b = (v & 0x00FF) << 8
-    # return b | a
-
-
-@micropython.viper
-def convert_888_565(src: uint) -> uint:
-    return (src & 0xF8) << 8 | (src & 0xFC00) >> 5 | (src & 0xF8_00_00) >> 19
-
-
-if 1:
-    palette = array(
-        "H",
-        [bgr565(i, i // 4, i // 8) for i in range(0, 256, 2)]
-        + [bgr565(i, i // 4, i // 8) for i in range(255, 0, -2)],
-    )
-else:
-    palette = array("H", [bgr565(i, i // 4, i // 8) for i in range(256)])
-palmask = const(255)
-assert len(palette) == (palmask + 1)
-
-
-palette_hsv255 = array(
-    "H", [convert_888_565(color.hsv(360.0 * i / 255.0, 255, 255).p) for i in range(256)]
-)
-palette_hsv127 = array(
-    "H", [convert_888_565(color.hsv(360.0 * i / 255.0, 127, 255).p) for i in range(256)]
-)
 
 
 @micropython.viper
@@ -159,26 +107,25 @@ def plasma_scroll(t: uint, y_min: uint):
 
 
 box_x = array("H", [0xFFFF] * 4 + [0] * 4)
-box_y = array(
-    "H",
+box_y = convert_palette(
     [
-        bgr565(255, 0, 0),
-        bgr565(255, 127, 0),
-        bgr565(255, 255, 0),
-        bgr565(255, 255, 63),
-        bgr565(127, 255, 0),
-        bgr565(0, 255, 0),
-        bgr565(0, 255, 127),
-        bgr565(63, 255, 255),
-        bgr565(0, 255, 255),
-        bgr565(0, 127, 255),
-        bgr565(0, 0, 255),
-        bgr565(63, 63, 255),
-        bgr565(127, 0, 255),
-        bgr565(255, 0, 255),
-        bgr565(255, 0, 127),
-        bgr565(255, 63, 63),
-    ],
+        (255, 0, 0),
+        (255, 127, 0),
+        (255, 255, 0),
+        (255, 255, 63),
+        (127, 255, 0),
+        (0, 255, 0),
+        (0, 255, 127),
+        (63, 255, 255),
+        (0, 255, 255),
+        (0, 127, 255),
+        (0, 0, 255),
+        (63, 63, 255),
+        (127, 0, 255),
+        (255, 0, 255),
+        (255, 0, 127),
+        (255, 63, 63),
+    ]
 )
 
 
