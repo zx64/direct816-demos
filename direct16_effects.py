@@ -16,7 +16,8 @@ HEIGHT = const(320)
 HALF_HEIGHT = const(HEIGHT // 2)
 SIZE = const(WIDTH * HEIGHT)
 HALF_SIZE = const(SIZE // 2)
-QUARTER_SIZE = const(SIZE // 4)
+HALF_U32_SIZE = const(2 * SIZE)
+QUARTER_U32_SIZE = const(SIZE)
 
 
 angle_bits = const(10)
@@ -31,8 +32,10 @@ def fill_565(v: uint):
     v16: uint = v & 0xFFFF
     v32: uint = v16 << 16 | v16
     fb32 = ptr32(display)
-    for idx in range(HALF_SIZE):
-        fb32[idx] = v32
+    end: uint = uint(fb32) + HALF_U32_SIZE
+    while uint(fb32) != end:
+        fb32[0] = v32
+        fb32 = ptr32(uint(fb32) + 4)
 
 
 @micropython.viper
@@ -40,15 +43,15 @@ def palcycle(t: uint, y_min: uint):
     fb32 = ptr32(display)
     pal = ptr16(palette)
 
-    if y_min == uint(0):
-        base = uint(0)
-    else:
-        base = uint(QUARTER_SIZE)
+    if y_min != uint(0):
+        fb32 = ptr32(uint(fb32) + QUARTER_U32_SIZE)
 
     val16: uint = pal[t & palmask]
     val = val16 << 16 | val16
-    for idx in range(base, base + QUARTER_SIZE):
-        fb32[idx] = val
+    end: uint = uint(fb32) + QUARTER_U32_SIZE
+    while uint(fb32) != end:
+        fb32[0] = val
+        fb32 = ptr32(uint(fb32) + 4)
 
 
 @micropython.viper
