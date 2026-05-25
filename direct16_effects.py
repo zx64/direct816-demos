@@ -16,8 +16,10 @@ HEIGHT = const(320)
 HALF_HEIGHT = const(HEIGHT // 2)
 SIZE = const(WIDTH * HEIGHT)
 HALF_SIZE = const(SIZE // 2)
-HALF_U32_SIZE = const(2 * SIZE)
-QUARTER_U32_SIZE = const(SIZE)
+# These values are for performing 32-bit pointer arithmetic on a 16-bit pointer
+# Unlike C, Viper pointer arithmetic always operates in bytes rather than sizeof(*p)
+SIZE_BYTES = const(SIZE * 2)
+HALF_SIZE_BYTES = const(SIZE)
 
 
 angle_bits = const(10)
@@ -32,7 +34,7 @@ def fill_565(v: uint):
     v16: uint = v & 0xFFFF
     v32: uint = v16 << 16 | v16
     fb32 = ptr32(display)
-    end: uint = uint(fb32) + HALF_U32_SIZE
+    end: uint = uint(fb32) + SIZE_BYTES
     while uint(fb32) != end:
         fb32[0] = v32
         fb32 = ptr32(uint(fb32) + 4)
@@ -44,11 +46,11 @@ def palcycle(t: uint, y_min: uint):
     pal = ptr16(palette)
 
     if y_min != uint(0):
-        fb32 = ptr32(uint(fb32) + QUARTER_U32_SIZE)
+        fb32 = ptr32(uint(fb32) + HALF_SIZE_BYTES)
 
     val16: uint = pal[t & palmask]
     val = val16 << 16 | val16
-    end: uint = uint(fb32) + QUARTER_U32_SIZE
+    end: uint = uint(fb32) + HALF_SIZE_BYTES
     while uint(fb32) != end:
         fb32[0] = val
         fb32 = ptr32(uint(fb32) + 4)
