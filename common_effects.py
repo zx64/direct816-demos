@@ -85,3 +85,30 @@ y_scroll = array(
         for theta in range(angle_len)
     ],
 )
+
+
+@micropython.viper
+def convert_pv_image16(img: object):
+    iwidth = int(img.width)
+    iheight = int(img.height)
+    isize = uint(iwidth * iheight)
+
+    pixels = array("H", [0 for _ in range(isize)])
+
+    dst_width = uint(iheight)
+    dst_height = uint(iwidth)
+
+    src: ptr32 = ptr32(img)
+    src_end: uint = uint(src) + isize * 4
+
+    dst: ptr16 = ptr16(pixels)
+
+    for y in range(iheight):
+        for x in range(iwidth):
+            p32 = uint(src[y * iwidth + x])
+            p16: uint = (
+                (p32 & 0xF8) << 8 | (p32 & 0xFC00) >> 5 | (p32 & 0xF8_00_00) >> 19
+            )
+            dst[x * iheight + y] = p16
+
+    return pixels, dst_width, dst_height

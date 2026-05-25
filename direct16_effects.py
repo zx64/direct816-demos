@@ -193,3 +193,93 @@ def checkernest(t: uint, y_min: uint):
                 )
             )
             idx += 1
+
+
+def pv_text(msg):
+    fnt = rom_font.nope
+    # TODO: get expected text dimensions for given font
+    img = image(len(msg) * 7, fnt.height)
+    img.antialias = X4
+    img.font = fnt
+    img.pen = color.rgb(0, 0, 0, 255)
+    img.clear()
+    img.pen = color.white
+    img.text(msg, 0, 0)
+
+    return img
+
+
+def pv_square(side, color):
+    img = image(side, side)
+    img.pen = color
+    img.clear()
+    return img
+
+
+pv_text = pv_text("Hello World!")
+pv_red = pv_square(64, color.red)
+pv_green = pv_square(32, color.green)
+pv_blue = pv_square(16, color.blue)
+
+from common_effects import convert_pv_image16
+
+
+cvt_text = convert_pv_image16(pv_text)
+cvt_red = convert_pv_image16(pv_red)
+cvt_green = convert_pv_image16(pv_green)
+cvt_blue = convert_pv_image16(pv_blue)
+
+
+@micropython.viper
+def blit_pv_image16(img, x: int, y: int):
+    if x >= WIDTH:
+        return
+    if y >= HEIGHT:
+        return
+
+    iwidth = int(img[1])
+    stride = uint(iwidth)
+    x_skip = uint(0)
+    if x < 0:
+        iwidth += x
+        x_skip = uint(-x)
+        if iwidth <= 0:
+            return
+        x = 0
+    if x + iwidth > WIDTH:
+        iwidth = WIDTH - x
+
+    iheight = int(img[2])
+    y_skip = uint(0)
+    if y < 0:
+        iheight += y
+        y_skip = uint(-y)
+        if iheight <= 0:
+            return
+        y = 0
+    if y + iheight > HEIGHT:
+        iheight = HEIGHT - y
+
+    origin = x + WIDTH * y
+    src_pixels = iwidth * iheight
+
+    src = ptr16(uint(ptr16(img[0])) + (x_skip + y_skip * stride) * BYTES_PER_PIXEL)
+    dst = ptr16(uint(ptr16(display)) + origin * BYTES_PER_PIXEL)
+
+    for py in range(iheight):
+        for px in range(iwidth):
+            dst[px + py * WIDTH] = src[px + py * stride]
+
+
+@micropython.viper
+def test_blit16(t: uint, y_min: uint):
+    if y_min != uint(0):
+        return
+
+    fill_565(GREY25)
+    sx = int(t - 32) % (WIDTH + 32)
+    sy = int(t - 32) % (HEIGHT + 32)
+    blit_pv_image16(cvt_red, sx, 0)
+    blit_pv_image16(cvt_green, 0, sy)
+    blit_pv_image16(cvt_blue, sx, sy)
+    blit_pv_image16(cvt_text, WIDTH - sx, HEIGHT - sy)

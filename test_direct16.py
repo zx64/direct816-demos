@@ -61,6 +61,7 @@ drawfuncs.extend(
             "plasma_scroll",
             "scrolling_boxes",
             "checkernest",
+            "test_blit16",
         ],
     )
 )
@@ -138,4 +139,5 @@ def main(drawfuncs):
 
 if __name__ == "__main__":
     # main(get_drawfuncs(_direct16_effects, "native", ["xor_scroll", "plasma_scroll"]))
+    # main(get_drawfuncs(direct16_effects, "viper", ["test_blit16"]))
     main(drawfuncs)
