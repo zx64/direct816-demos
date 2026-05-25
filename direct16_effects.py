@@ -17,7 +17,8 @@ BYTES_PER_PIXEL = const(2)
 HALF_HEIGHT = const(HEIGHT // 2)
 SIZE = const(WIDTH * HEIGHT)
 HALF_SIZE = const(SIZE // 2)
-# These values are for performing 32-bit pointer arithmetic on a 16-bit pointer
+
+# These values are for calculating pointers to the middle and end of the buffer
 # Unlike C, Viper pointer arithmetic always operates in bytes rather than sizeof(*p)
 SIZE_BYTES = const(BYTES_PER_PIXEL * SIZE)
 HALF_SIZE_BYTES = const(SIZE_BYTES // 2)
