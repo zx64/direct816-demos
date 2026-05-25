@@ -1,3 +1,4 @@
+import common_effects
 import math
 import micropython
 from array import array
@@ -21,7 +22,7 @@ QUARTER_SIZE = const(SIZE // 4)
 angle_bits = const(10)
 angle_len = const(1 << angle_bits)
 angle_mask = const(angle_len - 1)
-
+assert angle_mask == common_effects.angle_mask
 palmask = const(255)
 
 

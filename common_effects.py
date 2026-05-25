@@ -2,6 +2,9 @@ import math
 import micropython
 from array import array
 
+max_pal = const(256)
+palmask = const(max_pal - 1)
+
 
 # Expected values 0..255
 @micropython.viper
@@ -17,31 +20,31 @@ def u32_rgb565(src: uint) -> uint:
 
 # L: list[tuple[uint, uint, uint]]
 def convert_palette(L):
-    if len(L) > 256:
-        raise ValueError(f"Palette is too large {len(L)} > 256")
+    if len(L) > max_pal:
+        raise ValueError(f"Palette is too large {len(L)} > {max_pal}")
     return array("H", [rgb565(*i) for i in L])
 
 
 # f: Callable[[uint], tuple[uint, uint, uint]]
-def generate_palette(f, count=256):
-    if count > 256:
-        raise ValueError(f"Palette is too large {count} > 256")
+def generate_palette(f, count=max_pal):
+    if count > max_pal:
+        raise ValueError(f"Palette is too large {count} > {max_pal}")
     return array("H", [rgb565(*f(i)) for i in range(count)])
 
 
 def load_palette(filename: str):
-    temp = array("H", [0] * 256)
+    temp = array("H", [0] * max_pal)
     with open(filename, "rb") as f:
         size = f.readinto(temp)
         if size > 512:
-            raise ValueError(f"Palette is too large: {size / 2} > 256")
+            raise ValueError(f"Palette is too large: {size / 2} > {max_pal}")
 
     return temp
 
 
 def make_palette_cycle(palette):
-    if len(palette) != 256:
-        raise ValueError("Palette has to have 256 entries")
+    if len(palette) != max_pal:
+        raise ValueError("Palette has to have {max_pal} entries")
 
     # Compact palette by discarding every other entry
     for i in range(128):
@@ -55,7 +58,6 @@ def make_palette_cycle(palette):
 
 
 orange_cycle = make_palette_cycle(generate_palette(lambda i: (i, i // 4, i // 8)))
-palmask = const(255)
 assert len(orange_cycle) == (palmask + 1)
 
 angle_bits = const(10)
