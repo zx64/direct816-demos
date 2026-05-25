@@ -94,6 +94,7 @@ def convert_pv_image16(img: object):
     isize = uint(iwidth * iheight)
 
     pixels = array("H", [0 for _ in range(isize)])
+    mask = array("B", [0 for _ in range(isize)])
 
     dst_width = uint(iheight)
     dst_height = uint(iwidth)
@@ -110,5 +111,6 @@ def convert_pv_image16(img: object):
                 (p32 & 0xF8) << 8 | (p32 & 0xFC00) >> 5 | (p32 & 0xF8_00_00) >> 19
             )
             dst[x * iheight + y] = p16
+            mask[x * iheight + y] = 1 if int(p32 >> 24) == 255 else 0
 
-    return pixels, dst_width, dst_height
+    return pixels, mask, dst_width, dst_height

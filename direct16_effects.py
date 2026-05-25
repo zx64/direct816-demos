@@ -201,7 +201,7 @@ def pv_text(msg):
     img = image(len(msg) * 7, fnt.height)
     img.antialias = X4
     img.font = fnt
-    img.pen = color.rgb(0, 0, 0, 255)
+    img.pen = color.rgb(0, 0, 0, 0)
     img.clear()
     img.pen = color.white
     img.text(msg, 0, 0)
@@ -237,7 +237,7 @@ def blit_pv_image16(img, x: int, y: int):
     if y >= HEIGHT:
         return
 
-    iwidth = int(img[1])
+    iwidth = int(img[2])
     stride = uint(iwidth)
     x_skip = uint(0)
     if x < 0:
@@ -249,7 +249,7 @@ def blit_pv_image16(img, x: int, y: int):
     if x + iwidth > WIDTH:
         iwidth = WIDTH - x
 
-    iheight = int(img[2])
+    iheight = int(img[3])
     y_skip = uint(0)
     if y < 0:
         iheight += y
@@ -264,11 +264,13 @@ def blit_pv_image16(img, x: int, y: int):
     src_pixels = iwidth * iheight
 
     src = ptr16(uint(ptr16(img[0])) + (x_skip + y_skip * stride) * BYTES_PER_PIXEL)
+    mask = ptr8(uint(ptr8(img[1])) + (x_skip + y_skip * stride))
     dst = ptr16(uint(ptr16(display)) + origin * BYTES_PER_PIXEL)
 
     for py in range(iheight):
         for px in range(iwidth):
-            dst[px + py * WIDTH] = src[px + py * stride]
+            if mask[px + py * stride]:
+                dst[px + py * WIDTH] = src[px + py * stride]
 
 
 @micropython.viper
