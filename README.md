@@ -117,7 +117,9 @@ A static background can still be animated with palette cycling.
 I have re-enabled the [`_thread` module](https://docs.micropython.org/en/latest/library/_thread.html) which allows for the second core to assist with drawing from MicroPython.
 This along with [MicroPython's Viper code generator](https://docs.micropython.org/en/latest/reference/speed_python.html#the-viper-code-emitter) has allowed me to make effects in pure Python that still run at 60FPS.
 
-[Native modules](https://docs.micropython.org/en/latest/develop/natmod.html) are still faster but can be less convenient for prototyping.
+[Further Viper documentation](https://github.com/micropython/micropython/wiki/Improving-performance-with-Viper-code)
+
+[Native modules](https://docs.micropython.org/en/latest/develop/natmod.html) are even faster but can be less convenient for prototyping.
 
 The multi-threading in the demos isn't especially sophisticated: each core is given half
 the framebuffer to draw from a shared tick. This avoids having to implement more complex
