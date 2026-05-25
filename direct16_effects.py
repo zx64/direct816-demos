@@ -19,7 +19,7 @@ HALF_SIZE = const(SIZE // 2)
 # These values are for performing 32-bit pointer arithmetic on a 16-bit pointer
 # Unlike C, Viper pointer arithmetic always operates in bytes rather than sizeof(*p)
 SIZE_BYTES = const(SIZE * 2)
-HALF_SIZE_BYTES = const(SIZE)
+HALF_SIZE_BYTES = const(SIZE_BYTES // 2)
 
 
 angle_bits = const(10)

@@ -8,8 +8,10 @@ HEIGHT = const(320)
 HALF_HEIGHT = const(HEIGHT // 2)
 SIZE = const(WIDTH * HEIGHT)
 HALF_SIZE = const(SIZE // 2)
-U32_SIZE = const(SIZE // 4)
-HALF_U32_SIZE = const(U32_SIZE // 2)
+# These values are for performing 32-bit pointer arithmetic on an 8-bit pointer
+# Unlike C, Viper pointer arithmetic always operates in bytes rather than sizeof(*p)
+SIZE_BYTES = const(SIZE)
+HALF_SIZE_BYTES = const(SIZE_BYTES // 2)
 
 
 def use_palette(filename, layer=-1):
@@ -23,8 +25,10 @@ def fill8(c: uint):
     fb32 = ptr32(display)
     c = c & 0xFF
     v32 = c << 24 | c << 16 | c << 8 | c
-    for idx in range(U32_SIZE):
-        fb32[idx] = v32
+    end: uint = uint(fb32) + SIZE_BYTES
+    while uint(fb32) != end:
+        fb32[0] = v32
+        fb32 = ptr32(uint(fb32) + 4)
 
 
 @micropython.viper
@@ -32,32 +36,37 @@ def fill8_both_layers(c: uint):
     fb32 = ptr32(display)
     c = c & 0xFF
     v32 = c << 24 | c << 16 | c << 8 | c
-    for idx in range(U32_SIZE * 2):
-        fb32[idx] = v32
+    end: uint = uint(fb32) + SIZE_BYTES * 2
+    while uint(fb32) != end:
+        fb32[0] = v32
+        fb32 = ptr32(uint(fb32) + 4)
 
 
 @micropython.viper
 def fill8_upper(c: uint):
-    fb32 = ptr32(display)
+    fb32 = ptr32(uint(ptr32(display)) + SIZE_BYTES)
     c = c & 0xFF
     v32 = c << 24 | c << 16 | c << 8 | c
-    for idx in range(U32_SIZE, U32_SIZE * 2):
-        fb32[idx] = v32
+    end: uint = uint(fb32) + SIZE_BYTES
+    while uint(fb32) != end:
+        fb32[0] = v32
+        fb32 = ptr32(uint(fb32) + 4)
 
 
 @micropython.viper
 def palcycle(t: uint, y_min: uint):
     fb32 = ptr32(display)
 
-    if y_min == uint(0):
-        base = uint(0)
-    else:
-        base = uint(HALF_U32_SIZE)
+    if y_min != uint(0):
+        fb32 = ptr32(uint(fb32) + HALF_SIZE_BYTES)
 
     c = t & 0xFF
     v32 = c << 24 | c << 16 | c << 8 | c
-    for idx in range(base, base + HALF_U32_SIZE):
-        fb32[idx] = v32
+
+    end: uint = uint(fb32) + HALF_SIZE_BYTES
+    while uint(fb32) != end:
+        fb32[0] = v32
+        fb32 = ptr32(uint(fb32) + 4)
 
 
 @micropython.viper
