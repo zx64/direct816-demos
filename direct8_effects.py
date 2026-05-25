@@ -5,13 +5,13 @@ from array import array
 
 WIDTH = const(240)
 HEIGHT = const(320)
-BPP = const(1)
+BYTES_PER_PIXEL = const(1)
 HALF_HEIGHT = const(HEIGHT // 2)
 SIZE = const(WIDTH * HEIGHT)
 HALF_SIZE = const(SIZE // 2)
 # These values are for performing 32-bit pointer arithmetic on an 8-bit pointer
 # Unlike C, Viper pointer arithmetic always operates in bytes rather than sizeof(*p)
-SIZE_BYTES = const(BPP * SIZE)
+SIZE_BYTES = const(BYTES_PER_PIXEL * SIZE)
 HALF_SIZE_BYTES = const(SIZE_BYTES // 2)
 
 
