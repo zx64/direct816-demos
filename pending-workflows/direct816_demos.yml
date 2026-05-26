@@ -45,7 +45,7 @@ jobs:
     - name: "Prepare All: Generate cache key"
       shell: bash
       run: |
-        echo "CI_CACHE_KEY=`shasum "$CI_PROJECT_ROOT/ci/native_modules.sh" | cut -d " " -f 1`" >> $GITHUB_ENV
+        echo "CI_CACHE_KEY=`shasum "$CI_PROJECT_ROOT/ci/direct816_demos.sh" | cut -d " " -f 1`" >> $GITHUB_ENV
 
     - name: "Prepare All: Restore saved cache"
       id: cache-prepare-all
@@ -65,22 +65,22 @@ jobs:
       if: steps.cache-prepare-all.outputs.cache-hit == 'true'
       shell: bash
       run: |
-        source $CI_PROJECT_ROOT/ci/native_modules.sh
+        source $CI_PROJECT_ROOT/ci/direct816_demos.sh
         ci_install_build_deps
 
     - name: "Prepare All: Prepare tools & dependencies"
       if: steps.cache-prepare-all.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        source $CI_PROJECT_ROOT/ci/native_modules.sh
+        source $CI_PROJECT_ROOT/ci/direct816_demos.sh
         mkdir -p $CI_BUILD_ROOT
         ci_install_build_deps
         ci_prepare_all
 
-    - name: "Native Modules: Build"
+    - name: "Direct816 Demos: Build"
       shell: bash
       run: |
-        source $CI_PROJECT_ROOT/ci/native_modules.sh
+        source $CI_PROJECT_ROOT/ci/direct816_demos.sh
         ci_build
 
     - name: "Artifacts: Upload _direct8_effects.mpy"
