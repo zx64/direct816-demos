@@ -19,9 +19,9 @@ jobs:
     - name: Install Python Deps
       run: source ci/python.sh && qa_prepare_all
 
-    - name: Lint MicroPython Examples
+    - name: Lint MicroPython Code
       shell: bash
-      run: source ci/python.sh && qa_examples_check
+      run: source ci/python.sh && qa_root_check
 
     - name: Lint MicroPython Firmware
       shell: bash

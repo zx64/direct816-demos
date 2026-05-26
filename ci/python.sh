@@ -14,12 +14,12 @@ function qa_fix {
     ruff check --config "$SCRIPT_PATH/ruff.toml" --fix "$1"
 }
 
-function qa_examples_check {
-    qa_check examples/
+function qa_root_check {
+    qa_check .
 }
 
-function qa_examples_fix {
-    qa_fix examples/
+function qa_root_fix {
+    qa_fix .
 }
 
 function qa_firmware_check {
