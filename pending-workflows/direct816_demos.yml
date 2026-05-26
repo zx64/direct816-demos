@@ -1,4 +1,4 @@
-name: MicroPython
+name: Direct816_Demos
 
 on:
   push:
@@ -8,17 +8,16 @@ on:
 
 jobs:
   build:
-    name: MicroPython ${{ matrix.name }}
+    name: Direct816 Demos
     runs-on: ubuntu-24.04
     continue-on-error: true
     strategy:
       matrix:
         include:
-        - name: tufty
+        - name: direct816_demos
 
     env:
-      # MicroPython version will be contained in github.event.release.tag_name for releases
-      CI_RELEASE_FILENAME: ${{ matrix.name }}-${{ github.event.release.tag_name || github.sha }}-micropython
+      CI_RELEASE_FILENAME: ${{ matrix.name }}-${{ github.event.release.tag_name || github.sha }}-direct816
       CI_PROJECT_ROOT: ${{ github.workspace }}/src-${{ github.sha }}
       CI_BUILD_ROOT: ${{ github.workspace }}
       CI_USE_ENV: 1
@@ -32,10 +31,10 @@ jobs:
       uses: actions/cache@v4
       with:
         path: /home/runner/.ccache
-        key: ccache-micropython-${{ matrix.name }}-${{ github.ref }}-${{ github.sha }}
+        key: ccache-direct816-${{ matrix.name }}-${{ github.ref }}-${{ github.sha }}
         restore-keys: |
-          ccache-micropython-${{ matrix.name }}-${{ github.ref }}
-          ccache-micropython-${{ matrix.name }}-
+          ccache-direct816-${{ matrix.name }}-${{ github.ref }}
+          ccache-direct816-${{ matrix.name }}-
 
     - name: "Checkout Project"
       uses: actions/checkout@v4
@@ -46,7 +45,7 @@ jobs:
     - name: "Prepare All: Generate cache key"
       shell: bash
       run: |
-        echo "CI_CACHE_KEY=`shasum "$CI_PROJECT_ROOT/ci/micropython.sh" | cut -d " " -f 1`" >> $GITHUB_ENV
+        echo "CI_CACHE_KEY=`shasum "$CI_PROJECT_ROOT/ci/native_modules.sh" | cut -d " " -f 1`" >> $GITHUB_ENV
 
     - name: "Prepare All: Restore saved cache"
       id: cache-prepare-all
@@ -66,51 +65,44 @@ jobs:
       if: steps.cache-prepare-all.outputs.cache-hit == 'true'
       shell: bash
       run: |
-        source $CI_PROJECT_ROOT/ci/micropython.sh
+        source $CI_PROJECT_ROOT/ci/native_modules.sh
         ci_install_build_deps
 
     - name: "Prepare All: Prepare tools & dependencies"
       if: steps.cache-prepare-all.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        source $CI_PROJECT_ROOT/ci/micropython.sh
+        source $CI_PROJECT_ROOT/ci/native_modules.sh
         mkdir -p $CI_BUILD_ROOT
         ci_install_build_deps
         ci_prepare_all
 
-    - name: "MicroPython: Configure"
+    - name: "Native Modules: Build"
       shell: bash
       run: |
-        source $CI_PROJECT_ROOT/ci/micropython.sh
-        micropython_version
-        ci_cmake_configure
+        source $CI_PROJECT_ROOT/ci/native_modules.sh
+        ci_build
 
-    - name: "MicroPython: Build"
-      shell: bash
-      run: |
-        source $CI_PROJECT_ROOT/ci/micropython.sh
-        ci_cmake_build
-
-    - name: "Artifacts: Upload .uf2"
+    - name: "Artifacts: Upload _direct8_effects.mpy"
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.CI_RELEASE_FILENAME }}.uf2
-        path: ${{ env.CI_BUILD_ROOT }}/${{ env.CI_RELEASE_FILENAME }}.uf2
-        
-    - name: "Artifacts: Upload .uf2 (With Filesystem)"
+        name: _direct8_effects.mpy
+        path: ${{ env.CI_BUILD_ROOT }}/_direct8_effects.mpy
+
+    - name: "Artifacts: Upload _direct16_effects.mpy"
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.CI_RELEASE_FILENAME }}-with-filesystem.uf2
-        path: ${{ env.CI_BUILD_ROOT }}/${{ env.CI_RELEASE_FILENAME }}-with-filesystem.uf2
+        name: _direct16_effects.mpy
+        path: ${{ env.CI_BUILD_ROOT }}/_direct16_effects.mpy
 
-    - name: "Release: Upload .uf2"
+    - name: "Release: Upload _direct8_effects.mpy"
       if: github.event_name == 'release'
       uses: softprops/action-gh-release@v2
       with:
-        files: ${{ env.CI_BUILD_ROOT }}/${{ env.CI_RELEASE_FILENAME }}.uf2
+        files: ${{ env.CI_BUILD_ROOT }}/_direct8_effects.mpy
 
-    - name: "Release: Upload .uf2 (With Filesystem)"
+    - name: "Release: Upload _direct16_effects.mpy"
       if: github.event_name == 'release'
       uses: softprops/action-gh-release@v2
       with:
-        files: ${{ env.CI_BUILD_ROOT }}/${{ env.CI_RELEASE_FILENAME }}-with-filesystem.uf2
+        files: ${{ env.CI_BUILD_ROOT }}/_direct16_effects.mpy

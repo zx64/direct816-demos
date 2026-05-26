@@ -50,6 +50,7 @@ function ci_build {
     ccache --zero-stats || true
     CROSS_COMPILE="ccache" MPY_DIR="$CI_BUILD_ROOT/micropython" make -C "$CI_PROJECT_ROOT/natmod" || return 1
     ccache --show-stats || true
+    cp -v "$CI_PROJECT_ROOT/natmod/*/_*.mpy" "$CI_BUILD_ROOT"
 }
 
 if [ -z ${CI_USE_ENV+x} ] || [ -z ${CI_PROJECT_ROOT+x} ] || [ -z ${CI_BUILD_ROOT+x} ]; then
