@@ -304,6 +304,8 @@ def blit_pv_image16(img, x: int, y: int, masked: bool, darken: bool):
 @micropython.viper
 def test_blit16(t: uint, y_min: uint):
     if y_min != uint(0):
+        # TODO: We can tweak the screen clipping logic for blit_pv_image16 to implement
+        # the typical half-screen split used for multi-core drawing
         return
 
     fill_565(GREY25)
