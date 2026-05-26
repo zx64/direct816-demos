@@ -36,7 +36,6 @@ function ci_install_build_deps {
 }
 
 function ci_prepare_all {
-    ci_tools_clone
     ci_micropython_clone
     ci_micropython_build_mpy_cross
 }
