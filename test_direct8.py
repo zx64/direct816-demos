@@ -68,17 +68,17 @@ except ImportError:
 
 if use_pio or not use_prepare:
 
-    def overlay(t):
+    def overlay(_):
         pass
 
-    def prepare(t):
+    def prepare(_):
         return 0
 else:
     prepare = display.direct8_prepare
 
     if not use_overlay:
 
-        def overlay(t):
+        def overlay(_):
             pass
     else:
         try:
@@ -87,7 +87,7 @@ else:
         except ImportError:
 
             @micropython.viper
-            def overlay(t: uint):
+            def overlay(_):
                 fb = ptr16(display)
 
                 for idx in range(240 * 32):
@@ -183,7 +183,7 @@ def main(drawfuncs):
 
 def palette_cycle_direct():
     # Only time we touch the pixel data
-    fill8(0)
+    direct8_effects.fill8(0)
 
     draw_duration = 0
     present_duration = 0
@@ -212,9 +212,9 @@ def palette_cycle_direct():
 if __name__ == "__main__":
     if dual_layer:
         # Only run this once to demonstrate non-destructive update
-        simple_xor(0, 0)
-        simple_xor(0, HALF_HEIGHT)
-        fill8_upper(0)
+        direct8_effects.simple_xor(0, 0)
+        direct8_effects.simple_xor(0, HALF_HEIGHT)
+        direct8_effects.fill8_upper(0)
         # main([("l1 checker", layer1_checker_scroll)])
         main([("l1 plasma", _direct8_effects.l1_plasma_scroll)])
         # palette_cycle_direct()

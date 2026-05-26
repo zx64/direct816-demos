@@ -100,7 +100,6 @@ def convert_pv_image16(img: object):
     dst_height = uint(iwidth)
 
     src: ptr32 = ptr32(img)
-    src_end: uint = uint(src) + isize * 4
 
     dst: ptr16 = ptr16(pixels)
 

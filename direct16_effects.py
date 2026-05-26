@@ -1,11 +1,8 @@
 import common_effects
-import math
 import micropython
 from array import array
 from common_effects import (
     convert_palette,
-    generate_palette,
-    make_palette_cycle,
     x_scroll,
     y_scroll,
 )
@@ -155,7 +152,7 @@ def scrolling_boxes(t: uint, y_min: uint):
                 fb16[idx] = uint(bxs[x & 7] & bys[((boxcol_idx + (x >> 3)) & 15)])
                 idx += 1
         else:
-            for x in range(WIDTH):
+            for _ in range(WIDTH):
                 fb16[idx] = 0
                 idx += 1
 
@@ -261,7 +258,6 @@ def blit_pv_image16(img, x: int, y: int):
         iheight = HEIGHT - y
 
     origin = x + WIDTH * y
-    src_pixels = iwidth * iheight
 
     src = ptr16(uint(ptr16(img[0])) + (x_skip + y_skip * stride) * BYTES_PER_PIXEL)
     mask = ptr8(uint(ptr8(img[1])) + (x_skip + y_skip * stride))

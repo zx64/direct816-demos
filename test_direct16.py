@@ -3,7 +3,6 @@
 # Firmware changes:
 # Get PicoGraphics or PicoVector working
 import gc
-import micropython
 import direct16_effects
 from array import array
 from time import ticks_us

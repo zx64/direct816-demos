@@ -1,6 +1,13 @@
 import micropython
 from common_effects import load_palette
-from array import array
+
+try:
+    from _direct8_effects import xor_scroll
+except ImportError:
+
+    @micropython.viper
+    def xor_scroll(t: uint, y_min: uint):
+        pass
 
 
 WIDTH = const(240)
@@ -94,7 +101,7 @@ SKIP_X2 = const(48)
 
 @micropython.viper
 def layer1_checker_scroll(t: uint, y_min: uint):
-    _direct8_effects.xor_scroll(t, y_min)
+    xor_scroll(t, y_min)
     fb = ptr8(display)
 
     if y_min == uint(0):
