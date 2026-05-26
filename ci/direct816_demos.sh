@@ -33,6 +33,7 @@ function ci_apt_install_build_deps {
 
 function ci_install_build_deps {
     ci_apt_install_build_deps
+    python3 -m pip install pyelftools
 }
 
 function ci_prepare_all {
