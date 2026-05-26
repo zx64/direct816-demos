@@ -230,7 +230,7 @@ cvt_blue = convert_pv_image16(pv_blue)
 
 
 @micropython.viper
-def blit_pv_image16(img, x: int, y: int):
+def blit_pv_image16(img, x: int, y: int, masked: bool, darken: bool):
     if x >= WIDTH:
         return
     if y >= HEIGHT:
@@ -265,10 +265,30 @@ def blit_pv_image16(img, x: int, y: int):
     mask = ptr8(uint(ptr8(img[1])) + (x_skip + y_skip * stride))
     dst = ptr16(uint(ptr16(display)) + origin * BYTES_PER_PIXEL)
 
-    for py in range(iheight):
-        for px in range(iwidth):
-            if mask[px + py * stride]:
-                dst[px + py * WIDTH] = src[px + py * stride]
+    if masked:
+        if darken:
+            for py in range(iheight):
+                for px in range(iwidth):
+                    srcpos = px + py * stride
+                    dstpos = px + py * WIDTH
+                    if mask[srcpos]:
+                        dst[dstpos] = src[srcpos]
+                    else:
+                        dst[dstpos] >>= 1
+                        dst[dstpos] &= 0b01111_011111_01111
+        else:
+            for py in range(iheight):
+                for px in range(iwidth):
+                    srcpos = px + py * stride
+                    dstpos = px + py * WIDTH
+                    if mask[srcpos]:
+                        dst[dstpos] = src[srcpos]
+    else:
+        for py in range(iheight):
+            for px in range(iwidth):
+                srcpos = px + py * stride
+                dstpos = px + py * WIDTH
+                dst[dstpos] = src[srcpos]
 
 
 @micropython.viper
@@ -279,7 +299,7 @@ def test_blit16(t: uint, y_min: uint):
     fill_565(GREY25)
     sx = int(t - 32) % (WIDTH + 32)
     sy = int(t - 32) % (HEIGHT + 32)
-    blit_pv_image16(cvt_red, sx, 0)
-    blit_pv_image16(cvt_green, 0, sy)
-    blit_pv_image16(cvt_blue, sx, sy)
-    blit_pv_image16(cvt_text, WIDTH - sx, HEIGHT - sy)
+    blit_pv_image16(cvt_red, sx, 0, False, False)
+    blit_pv_image16(cvt_green, 0, sy, False, False)
+    blit_pv_image16(cvt_blue, sx, sy, False, False)
+    blit_pv_image16(cvt_text, WIDTH - sx, HEIGHT - sy, True, True)
