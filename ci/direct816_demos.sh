@@ -51,11 +51,12 @@ function ci_build {
     CROSS_COMPILE="ccache" MPY_DIR="$CI_BUILD_ROOT/micropython" make -C "$CI_PROJECT_ROOT/natmod" || return 1
     ccache --show-stats || true
     rm -fr "$CI_BUILD_ROOT/direct816_demos"
-    mkdir "$CI_BUILD_ROOT/direct816_demos"
+    mkdir "$CI_BUILD_ROOT/direct816_demos" || return 1
     cp -a -t "$CI_BUILD_ROOT/direct816_demos" "$CI_PROJECT_ROOT/firmware/"* || return 1
     cp -v "$CI_PROJECT_ROOT/natmod/"*/_*.mpy "$CI_BUILD_ROOT" || return 1
     mv -v "$CI_PROJECT_ROOT/natmod/"*/_*.mpy "$CI_BUILD_ROOT/direct816_demos/apps/direct816_demos" || return 1
     cd "$CI_BUILD_ROOT" || return 1
+    rm -f direct816_demos.zip
     zip -9r direct816_demos.zip direct816_demos/ || return 1
 }
 
