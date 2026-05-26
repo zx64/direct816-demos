@@ -178,10 +178,8 @@ the PIO code accomplished the desired outcome.
 - Add an optional state update function to effects that happens before drawing
 - Use Tufty2350's buttons to cycle through effects
 - Add a menu for effects like the [existing effects demo](https://github.com/pimoroni/tufty2350/tree/main/firmware/apps/demos)
+- Add way to switch between palettes
 - Add title cards for each effect
-- Package into a Badgeware app. For now I'm just copying libraries and launching with
-  `mpremote run`
-- Build script for CI and releases
 - New effects
     - I'd like to implement various 80s-90s demo effects
     - Remake the [world demo](https://github.com/pimoroni/tufty2350/tree/main/firmware/apps/demos/demos/world.py)
