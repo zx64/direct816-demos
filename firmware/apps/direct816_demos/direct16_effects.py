@@ -215,10 +215,20 @@ def pv_square(side, color):
     return img
 
 
+def pv_circle(side, color):
+    # TODO: circle position is silghtly off centre
+    img = image(side + 1, side + 1)
+    img.pen = color.rgb(0, 0, 0, 0)
+    img.clear()
+    img.pen = color
+    img.circle(vec2(side // 2, side // 2), side // 2)
+    return img
+
+
 pv_text = pv_text("Hello World!")
-pv_red = pv_square(64, color.red)
-pv_green = pv_square(32, color.green)
-pv_blue = pv_square(16, color.blue)
+pv_red = pv_circle(64, color.red)
+pv_green = pv_circle(32, color.green)
+pv_blue = pv_circle(16, color.blue)
 
 from common_effects import convert_pv_image16
 
@@ -299,7 +309,7 @@ def test_blit16(t: uint, y_min: uint):
     fill_565(GREY25)
     sx = int(t - 32) % (WIDTH + 32)
     sy = int(t - 32) % (HEIGHT + 32)
-    blit_pv_image16(cvt_red, sx, 0, False, False)
-    blit_pv_image16(cvt_green, 0, sy, False, False)
-    blit_pv_image16(cvt_blue, sx, sy, False, False)
+    blit_pv_image16(cvt_red, sx, 0, True, False)
+    blit_pv_image16(cvt_green, 0, sy, True, False)
+    blit_pv_image16(cvt_blue, sx, sy, True, False)
     blit_pv_image16(cvt_text, WIDTH - sx, HEIGHT - sy, True, True)
