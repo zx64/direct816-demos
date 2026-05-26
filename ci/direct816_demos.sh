@@ -23,7 +23,7 @@ function ci_micropython_clone {
 
 function ci_micropython_build_mpy_cross {
     ccache --zero-stats || true
-    CROSS_COMPILE="ccache " make -C "$CI_BUILD_ROOT/micropython/mpy-cross"
+    CROSS_COMPILE="ccache " make -C "$CI_BUILD_ROOT/micropython/mpy-cross" -j2
     ccache --show-stats || true
 }
 
