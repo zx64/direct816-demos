@@ -95,6 +95,12 @@ jobs:
         name: _direct16_effects.mpy
         path: ${{ env.CI_BUILD_ROOT }}/_direct16_effects.mpy
 
+    - name: "Artifacts: Upload direct816_demos.zip"
+      uses: actions/upload-artifact@v4
+      with:
+        name: direct816_demos.zip
+        path: ${{ env.CI_BUILD_ROOT }}/direct816_demos.zip
+
     - name: "Release: Upload _direct8_effects.mpy"
       if: github.event_name == 'release'
       uses: softprops/action-gh-release@v2
@@ -106,3 +112,9 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: ${{ env.CI_BUILD_ROOT }}/_direct16_effects.mpy
+
+    - name: "Release: Upload direct816_demos.zip"
+      if: github.event_name == 'release'
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ${{ env.CI_BUILD_ROOT }}/direct816_demos.zip"

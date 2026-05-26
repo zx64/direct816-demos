@@ -28,7 +28,7 @@ function ci_micropython_build_mpy_cross {
 }
 
 function ci_apt_install_build_deps {
-    sudo apt update && sudo apt install ccache
+    sudo apt update && sudo apt install ccache zip
 }
 
 function ci_install_build_deps {
@@ -50,7 +50,11 @@ function ci_build {
     ccache --zero-stats || true
     CROSS_COMPILE="ccache" MPY_DIR="$CI_BUILD_ROOT/micropython" make -C "$CI_PROJECT_ROOT/natmod" || return 1
     ccache --show-stats || true
-    cp -v "$CI_PROJECT_ROOT/natmod/*/_*.mpy" "$CI_BUILD_ROOT"
+    cp -r "$CI_PROJECT_ROOT/firmware" "$CI_BUILD_ROOT/direct816_demos" || return 1
+    cp -v "$CI_PROJECT_ROOT/natmod/"*/_*.mpy "$CI_BUILD_ROOT" || return 1
+    mv -v "$CI_PROJECT_ROOT/natmod/"*/_*.mpy "$CI_BUILD_ROOT/direct816_demos/apps/direct816_demos" || return 1
+    cd "$CI_BUILD_ROOT" || return 1
+    zip -9r direct816_demos.zip direct816_demos/ || return 1
 }
 
 if [ -z ${CI_USE_ENV+x} ] || [ -z ${CI_PROJECT_ROOT+x} ] || [ -z ${CI_BUILD_ROOT+x} ]; then
