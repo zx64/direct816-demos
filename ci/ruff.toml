@@ -3,7 +3,9 @@ builtins = [
     "micropython",
     "const",
     "ptr8",
+    "ptr16",
     "ptr32",
+    "uint",
 
 # picovector
     "algorithm",
@@ -26,6 +28,9 @@ builtins = [
     "loop",
     "reset",
     "fatal_error",
+    "OFF",
+    "X2",
+    "X4",
 
 # math.py
     "clamp",
