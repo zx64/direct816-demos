@@ -172,6 +172,7 @@ the PIO code accomplished the desired outcome.
       original Tufty2040.
 
 ## For this repository and the demos:
+- CI doesn't mark a commit as bad even if the interior build task fails
 - Tidy up code duplication between the two testbeds
 - Document how I'm using `_thread`
 - Add a way for two layer effects to be specified
