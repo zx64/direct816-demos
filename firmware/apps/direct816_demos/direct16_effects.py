@@ -1,4 +1,5 @@
 import common_effects
+import math
 import micropython
 from array import array
 from common_effects import (
@@ -194,8 +195,9 @@ def checkernest(t: uint, y_min: uint):
 
 def pv_text(msg):
     fnt = rom_font.nope
-    # TODO: get expected text dimensions for given font
-    img = image(len(msg) * 7, fnt.height)
+    screen.font = fnt
+    w, h = screen.measure_text(msg)
+    img = image(math.ceil(w), math.ceil(h))
     img.antialias = X4
     img.font = fnt
     img.pen = color.rgb(0, 0, 0, 0)
