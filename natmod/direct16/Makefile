@@ -1,4 +1,4 @@
-MPY_DIR = ../micropython
+MPY_DIR ?= ../micropython
 
 MOD = _direct16_effects
 
