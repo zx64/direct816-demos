@@ -1,3 +1,4 @@
 *.mpy
+.ruff_cache
 build
 micropython
