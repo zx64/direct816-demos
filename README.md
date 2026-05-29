@@ -234,7 +234,9 @@ class Effect:
     def update(self, t: int, dT: float, core1: bool):
         pass
 
-    def draw(self, dest: rect, core1: bool):
+    # scroll uses logical coordinates: can be negative, can be greater than screen bounds
+    # dest uses screen coordinates, caller's responsibility to ensure correct clipping
+    def draw(self, scroll: vec2, dest: rect, core1: bool):
         pass
 
     def set_palette(self, palette, layer):
@@ -242,7 +244,7 @@ class Effect:
         pass
 
 
-class XorScroll(Effect):
+class XorCycle(Effect):
     ...
 
 
@@ -251,7 +253,7 @@ class FlyingCubes(Effect):
     from _cubes_effect import update, draw
 
 
-RegisterEffect(XorScroll, direct16=True, foreground=False)
+RegisterEffect(XorCycle, direct16=True, foreground=False)
 RegisterEffect(FlyingCubes, direct16=True, foreground=True)
 ```
 
@@ -269,24 +271,25 @@ The app logic is implemented as a multi-threaded state machine, where core 1 wai
 line for core 0 before proceeding to the next step.
 
 ```
-State #                    Core 0    Core 1
------------------------------------------------------
-0                   global_input()   ---- IDLE ----
-           tick++, dT = now - prev
------------------------------------------------------
-1                    select next effect(s)
------------------------------------------------------
-2        effect_input[n](tick, dT)   ---- IDLE ----
------------------------------------------------------
-3  update_overlay(tick, dT, False)   update_overlay(tick, dT, True)
-        update[n](tick, dT, False)   update[n](tick, dT, True)
------------------------------------------------------
-4       draw[n](dest[n][0], False)   draw[n](dest[n][1], True)
-                    prepare(False)   prepare(True)
-                    overlay(False)   overlay(True)
------------------------------------------------------
-5                        present()   ---- IDLE ----
------------------------------------------------------
+State #                                   Core 0   Core 1
+-------------------------------------------------------------------------------------
+0                                 global_input()   ---- IDLE ----
+                         tick++, dT = now - prev
+-------------------------------------------------------------------------------------
+1                                    select next effect(s)
+-------------------------------------------------------------------------------------
+2              effects[n].handle_input(tick, dT)   ---- IDLE ----
+-------------------------------------------------------------------------------------
+3          update_overlay(tick, dT, core1=False)
+        update_transition(tick, dT, core1=False)   (all same but core1=True)
+        effects[n].update(tick, dT, core1=False)
+-------------------------------------------------------------------------------------
+4  e[n].draw(dest[n][0], scroll[n], core1=False)   e[n].draw(dest[n][1], scroll[n], core1=True)
+                            prepare(core1=False)   prepare(core1=True)
+                            overlay(core1=False)   overlay(core1=True)
+-------------------------------------------------------------------------------------
+5                                      present()   ---- IDLE ----
+-------------------------------------------------------------------------------------
 ```
 
 ## Locks and thread safety
@@ -309,11 +312,13 @@ Each thread's function pointers for the subsequent states are updated according 
 decisions made in state 0.
 
 ## State 2
-`effect_input` usually a no-op but could be used to read sensor stick or poll controller
+`handle_input` usually a no-op but could be used to read sensor stick or poll controller
 
 ## State 3
-`update_overlay` steps any animations related to the overlay as well as any effect
-transition
+`update_overlay` steps any animations used in the final overlay
+
+`update_transition` steps any animations used to transition between effects, e.g. changing
+destination rectangle or scroll point.
 
 `update` allows for per-frame calculations and state mutations that are guaranteed to
 complete before any drawing.
