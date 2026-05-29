@@ -262,6 +262,7 @@ State #                    Core 0    Core 1
 -----------------------------------------------------
 ```
 
+## Locks and thread safety
 The only locking implemented is related to advancing the state machine.
 
 Effects should be written to avoid needing any finer grained locks, e.g.
@@ -317,7 +318,8 @@ inside the rectangle provided
 Important: do as little as possible to leave as much time for effect drawing
 
 ## State 5
-`present` will wait for DMA (direct16 only) and vsync (both) before issuing a new DMA
+`present` will wait for DMA (direct16 only) and vsync (both) before initiating a new DMA
+transfer for the new framebuffer.
 
 
 # Direct816 blitter API
