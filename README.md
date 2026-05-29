@@ -229,25 +229,30 @@ class Effect:
     name: str
 
     def handle_input(self, t: int, dT: float):
-        ...
+        pass
 
     def update(self, t: int, dT: float, core1: bool):
-        ...
+        pass
 
     def draw(self, dest: rect, core1: bool):
-        ...
+        pass
 
     def set_palette(self, palette, layer):
         # D16 effects don't need palettes, but can use them as e.g. precalculated gradients
-        ...
+        pass
 
 
 class XorScroll(Effect):
     ...
 
 
+# Native code can focus on own logic rather than implementing classes with Python API
+class FlyingCubes(Effect):
+    from _cubes_effect import update, draw
+
 
 RegisterEffect(XorScroll, direct16=True, foreground=False)
+RegisterEffect(FlyingCubes, direct16=True, foreground=True)
 ```
 
 Direct8 and Direct16 effects not intended to be combined for efficiency reasons, the demo
