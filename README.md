@@ -8,6 +8,7 @@ Tested with [ARM GCC 15.2](https://developer.arm.com/downloads/-/arm-gnu-toolcha
 I wouldn't call the following documentation yet, it's mostly a braindump of "Oh I should
 mention that" while I think through the scope and API for this.
 
+No AI was used during any step of this.
 
 # Direct816?
 The [existing graphics APIs](https://badgewa.re/docs) included in the Tufty2350 firmware
