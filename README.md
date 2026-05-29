@@ -227,6 +227,8 @@ Effects get refactored into something like
 ```python
 class Effect:
     name: str
+    direct16: bool # direct8 if false
+    foreground: bool # effect is suitable for drawing on top of another
 
     def handle_input(self, t: int, dT: float):
         pass
@@ -237,6 +239,8 @@ class Effect:
     def draw(self, dest: rect, core1: bool):
         pass
 ```
+
+Direct8 and Direct16 effects are difficult to combine efficiently.
 
 The app logic is implemented as a multi-threaded state machine, where core 1 waits at the
 line for core 0 before proceeding to the next step.
