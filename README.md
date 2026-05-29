@@ -254,6 +254,12 @@ State #                    Core 0    Core 1
 -----------------------------------------------------
 ```
 
+The only locking implemented is related to advancing the state machine.
+
+Effects should be written to avoid needing any finer grained locks, e.g.
+- identify and partition independent calculations inside update code
+- not updating shared state inside drawing code, only writing to the region provided
+
 ## State 0
 `global_input` handles menu actions to change effect and palette as well as time keeping
 
@@ -268,10 +274,17 @@ decisions made in state 0.
 `update_overlay` steps any animations related to the overlay as well as any effect
 transition
 
-`update` allows for per-frame calculations that are guaranteed to complete before any
-drawing
+`update` allows for per-frame calculations and state mutations that are guaranteed to
+complete before any drawing.
+
+Multi-threading this may be difficult because of data dependencies between sophisticated
+calculations, but simple particle logic like `position[n] += velocity[n] * dT` over two
+non-overlapping ranges should be fine.
 
 ## State 4
+Effects should not mutate any shared state during this phase to ensure everything should
+be safe to read from either core.
+
 ### draw
 `draw` isn't necessarily updating the entire screen (or half screen), there are various
 transitions between effects that can be accomplished by animating the destination
