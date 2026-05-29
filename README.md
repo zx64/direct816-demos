@@ -159,6 +159,7 @@ the PIO code accomplished the desired outcome.
       experience to more easily port over bits of your drawing code.
 - Investigate what can be accelerated with the interpolator hardware
 - Extract common helper functions from the demos into new module(s)
+  - See later for more thoughts on this
 
 ### Direct8 specific:
 - More palette operations: write to subset, rotate inside subset
@@ -176,8 +177,13 @@ the PIO code accomplished the desired outcome.
 - CI doesn't mark a commit as bad even if the interior build task fails
 - Tidy up code duplication between the two testbeds
 - Document how I'm using `_thread`
+  - The current approach uses a single lock to ensure either core 0 and 1 are drawing XOR
+    core 0 is updating shared state, waiting for vsync and issuing DMA.
+  - Should be replaced by the design outlined later on.
 - Add a way for two layer effects to be specified
+  - Should be handled by the design outlined later on.
 - Add an optional state update function to effects that happens before drawing
+  - Should be handled by the design outlined later on.
 - Use Tufty2350's buttons to cycle through effects
 - Add a menu for effects like the [existing effects demo](https://github.com/pimoroni/tufty2350/tree/main/firmware/apps/demos)
 - Add way to switch between palettes
@@ -191,6 +197,8 @@ the PIO code accomplished the desired outcome.
 - Preview screenshots and videos
 - Tools to prepare images and palettes
 - Make boot button exit to bootloader
+  - Badgeware already registers an IRQ for that button to reset
+  - Alternative: add the picotool Reset handler to MicroPython
 
 # More rambling that I felt needed writing down somewhere
 There is potential for some further improvements with more intrusive changes to the ST7789
@@ -214,7 +222,7 @@ Linus Akesson's post about his 2025 demo [Kaleidoscopico](https://www.linusakess
 He is also working on a technical video about his 2026 demo [Sum Ergo Demonstro](https://linusakesson.net/scene/sum-ergo-demonstro/index.php).
 
 
-# Concepting how the demo app should evolve
+# Thoughts on how to refactor the demo code into a better app
 Effects get refactored into something like
 ```python
 class Effect:
