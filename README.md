@@ -227,20 +227,38 @@ Effects get refactored into something like
 ```python
 class Effect:
     name: str
-    direct16: bool # direct8 if false
-    foreground: bool # effect is suitable for drawing on top of another
 
     def handle_input(self, t: int, dT: float):
-        pass
+        ...
 
     def update(self, t: int, dT: float, core1: bool):
-        pass
+        ...
 
     def draw(self, dest: rect, core1: bool):
-        pass
+        ...
+
+    def set_palette(self, palette, layer):
+        # D16 effects don't need palettes, but can use them as e.g. precalculated gradients
+        ...
+
+
+class XorScroll(Effect):
+    ...
+
+
+
+RegisterEffect(XorScroll, direct16=True, foreground=False)
 ```
 
-Direct8 and Direct16 effects are difficult to combine efficiently.
+Direct8 and Direct16 effects not intended to be combined for efficiency reasons, the demo
+will therefore have separate lists of effects.
+
+Since Direct8 is designed around palettes, any transitions where multiple effects share a
+layer need to be deliberately written or share a palette.
+Otherwise we can do brief palette fades to make the swap between effects less jarring.
+
+Foreground effects are for effects that only touch a limited number of pixels so the
+existing background can be seen behind it.
 
 The app logic is implemented as a multi-threaded state machine, where core 1 waits at the
 line for core 0 before proceeding to the next step.
