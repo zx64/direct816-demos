@@ -234,37 +234,40 @@ The app logic is implemented as a multi-threaded state machine, where core 1 wai
 line for core 0 before proceeding to the next step.
 
 ```
-State #     Core 0                   Core 1
+State #                    Core 0    Core 1
 -----------------------------------------------------
-0                   global_input()   ------
-           tick++, dT = now - prev   ------
+0                   global_input()   ---- IDLE ----
+           tick++, dT = now - prev
 -----------------------------------------------------
 1                    select next effect(s)
 -----------------------------------------------------
-2        effect_input[n](tick, dT)   ------
+2        effect_input[n](tick, dT)   ---- IDLE ----
 -----------------------------------------------------
 3  update_overlay(tick, dT, False)   update_overlay(tick, dT, True)
-        update[n](tick, dT, False)   updatn[n](tick, dT, True)
+        update[n](tick, dT, False)   update[n](tick, dT, True)
 -----------------------------------------------------
 4       draw[n](dest[n][0], False)   draw[n](dest[n][1], True)
                     prepare(False)   prepare(True)
                     overlay(False)   overlay(True)
 -----------------------------------------------------
-5                        present()   ------
+5                        present()   ---- IDLE ----
 -----------------------------------------------------
 ```
 
 ## State 0
-`global_input` handles menu actions to change effect and palette
+`global_input` handles menu actions to change effect and palette as well as time keeping
 
 ## State 1
-`update_overlay` steps any animations related to the overlay as well as any effect
-transition
+Each thread's function pointers for the subsequent states are updated according to
+decisions made in state 0.
 
 ## State 2
 `effect_input` usually a no-op but could be used to read sensor stick or poll controller
 
 ## State 3
+`update_overlay` steps any animations related to the overlay as well as any effect
+transition
+
 `update` allows for per-frame calculations that are guaranteed to complete before any
 drawing
 
@@ -274,9 +277,9 @@ drawing
 transitions between effects that can be accomplished by animating the destination
 rectangles inside `update_overlay`. e.g. slide in from one side, grow outwards from a point
 
-we could also draw small live previews of the effects on a menu
+Another use for sub-screen drawing would be live previews of the effects on a menu
 
-caution: the provided destination rectangle is different on either core, only ever draw
+Caution: the provided destination rectangle is different on either core, only ever draw
 inside the rectangle provided
 
 ### prepare
@@ -285,7 +288,7 @@ inside the rectangle provided
 ### overlay
 `overlay` is where the menu and any other light UI elements are drawn, always as direct16
 
-important: do as little as possible to leave as much time for effect drawing
+Important: do as little as possible to leave as much time for effect drawing
 
 ## State 5
 `present` will wait for DMA (direct16 only) and vsync (both) before issuing a new DMA
@@ -294,7 +297,8 @@ important: do as little as possible to leave as much time for effect drawing
 # Direct816 blitter API
 
 The conversion and blitting code currently living in `direct16_effects.py` should be
-extracted into a more reusable API, something like:
+extracted into a more reusable API, something conceptually like this but using as much
+native code as possible.
 
 ```python
 Mask16Skip = const(0) # blit all pixels (small optimisation for background blits)
