@@ -211,3 +211,115 @@ that list above so unlikely to happen.
 Linus Akesson's post about his 2025 demo [Kaleidoscopico](https://www.linusakesson.net/scene/kaleidoscopico/index.php) is great reading and talks about his 12-bit palette implementation.
 
 He is also working on a technical video about his 2026 demo [Sum Ergo Demonstro](https://linusakesson.net/scene/sum-ergo-demonstro/index.php).
+
+
+# Concepting how the demo app should evolve
+Effects get refactored into something like
+```python
+class Effect:
+    name: str
+
+    def handle_input(self, t: int, dT: float):
+        pass
+
+    def update(self, t: int, dT: float, core1: bool):
+        pass
+
+    def draw(self, dest: rect, core1: bool):
+        pass
+```
+
+The app logic is implemented as a multi-threaded state machine, where core 1 waits at the
+line for core 0 before proceeding to the next step.
+
+```
+State #     Core 0                   Core 1
+-----------------------------------------------------
+0                   global_input()   ------
+           tick++, dT = now - prev   ------
+-----------------------------------------------------
+1                    select next effect(s)
+-----------------------------------------------------
+2        effect_input[n](tick, dT)   ------
+-----------------------------------------------------
+3  update_overlay(tick, dT, False)   update_overlay(tick, dT, True)
+        update[n](tick, dT, False)   updatn[n](tick, dT, True)
+-----------------------------------------------------
+4       draw[n](dest[n][0], False)   draw[n](dest[n][1], True)
+                    prepare(False)   prepare(True)
+                    overlay(False)   overlay(True)
+-----------------------------------------------------
+5                        present()   ------
+-----------------------------------------------------
+```
+
+## State 0
+`global_input` handles menu actions to change effect and palette
+
+## State 1
+`update_overlay` steps any animations related to the overlay as well as any effect
+transition
+
+## State 2
+`effect_input` usually a no-op but could be used to read sensor stick or poll controller
+
+## State 3
+`update` allows for per-frame calculations that are guaranteed to complete before any
+drawing
+
+## State 4
+### draw
+`draw` isn't necessarily updating the entire screen (or half screen), there are various
+transitions between effects that can be accomplished by animating the destination
+rectangles inside `update_overlay`. e.g. slide in from one side, grow outwards from a point
+
+we could also draw small live previews of the effects on a menu
+
+caution: the provided destination rectangle is different on either core, only ever draw
+inside the rectangle provided
+
+### prepare
+`prepare` is a no-op in direct16 mode, no point in waiting for DMA to finish yet
+
+### overlay
+`overlay` is where the menu and any other light UI elements are drawn, always as direct16
+
+important: do as little as possible to leave as much time for effect drawing
+
+## State 5
+`present` will wait for DMA (direct16 only) and vsync (both) before issuing a new DMA
+
+
+# Direct816 blitter API
+
+The conversion and blitting code currently living in `direct16_effects.py` should be
+extracted into a more reusable API, something like:
+
+```python
+Mask16Skip = const(0) # blit all pixels (small optimisation for background blits)
+Mask16Transparent = const(1) # unmasked pixels are not written
+Mask16Darken = const(2) # unmasked pixels are darkened by halving their value
+
+class D16Image:
+    w: int
+    h: int
+    pixels: array("H")
+    mask: array("B") | None
+
+    def blit(self, src: rect, dest: rect, masked: int):
+        pass
+
+Mask8Skip = const(0) # blit all pixels
+Mask8Use = const(1) # use mask array or palette index
+Mask8Threshold = const(2) # any palette index less than this value is skipped
+
+class D8Image:
+    w: int
+    h: int
+    pixels: array("B")
+    mask: array("B") | int
+
+    def blit(self, src: rect, dest: rect, masked: int):
+        pass
+
+```
