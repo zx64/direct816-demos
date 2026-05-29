@@ -265,8 +265,13 @@ State #                    Core 0    Core 1
 The only locking implemented is related to advancing the state machine.
 
 Effects should be written to avoid needing any finer grained locks, e.g.
-- identify and partition independent calculations inside update code
-- not updating shared state inside drawing code, only writing to the region provided
+- Update: Identify and partition independent calculations
+- Draw: Do not update shared state
+- Draw: only writing to the region of pixels provided by the framework, which ensures
+  disjoint regions between the two cores.
+
+As a last resort, effects can create their own lock object with `_thread.allocate_lock()`
+in their `__init__` and use `with` blocks to guard critical sections.
 
 ## State 0
 `global_input` handles menu actions to change effect and palette as well as time keeping
