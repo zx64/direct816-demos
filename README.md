@@ -217,9 +217,9 @@ I'd like to eventually change how MicroPython native modules are built so it's l
 on Windows, supports C++ and can use some Pico SDK features. But I already have plenty on
 that list above so unlikely to happen.
 
-Linus Akesson's post about his 2025 demo [Kaleidoscopico](https://www.linusakesson.net/scene/kaleidoscopico/index.php) is great reading and talks about his 12-bit palette implementation.
+Linus Akesson's post about his RP2350 demo from 2025 [Kaleidoscopico](https://www.linusakesson.net/scene/kaleidoscopico/index.php) is great reading and talks about his 12-bit palette implementation.
 
-He is also working on a technical video about his 2026 demo [Sum Ergo Demonstro](https://linusakesson.net/scene/sum-ergo-demonstro/index.php).
+He has also made [an in-depth video](https://www.youtube.com/watch?v=0_9YS2tsdYc) about his 2026 RP2350 demo [Sum Ergo Demonstro](https://linusakesson.net/scene/sum-ergo-demonstro/index.php).
 
 
 # Thoughts on how to refactor the demo code into a better app
