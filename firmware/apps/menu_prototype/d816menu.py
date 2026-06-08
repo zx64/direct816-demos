@@ -13,16 +13,21 @@ def init():
     screen.font = rom_font.nope
     font_width, font_height = screen.measure_text("W")
 
-    global background_effect_names, foreground_effect_names, palette_names, num_cols
+    global effect_names, palette_names, num_cols
 
-    background_effect_names = [
-        "palette cycling",
-        "simple xor",
-        "scrolling xor",
-        "plasma",
-        "checkerboard rotozoom",
+    effect_names = [
+        [  # Background effects
+            "palette cycling",
+            "simple xor",
+            "scrolling xor",
+            "plasma",
+            "checkerboard rotozoom",
+        ],
+        [  # Foreground effects
+            "<no effect>",
+            "checkerboard rotozoom",
+        ],
     ]
-    foreground_effect_names = ["<no effect>", "checkerboard rotozoom"]
     try:
         palette_names = sorted(
             [filename.replace(".bin", "") for filename in os.listdir(palette_dir)]
@@ -31,15 +36,14 @@ def init():
         palette_names = ["default"]
 
     num_cols = [
-        len(background_effect_names),
-        len(foreground_effect_names),
+        len(effect_names[0]),
+        len(effect_names[1]),
         len(palette_names),
     ]
 
     global effect_sprites, preview_palette_strips, full_palette_strips, ui_labels
     effect_sprites = {
-        name: make_text_sprite(name)
-        for name in set(background_effect_names + foreground_effect_names)
+        name: make_text_sprite(name) for name in set(effect_names[0] + effect_names[1])
     }
     ui_labels = [make_text_sprite(text) for text in ["bg: ", "fg: ", "pal: "]]
 
@@ -132,29 +136,20 @@ class D816Menu:
         screen.pen = color.green
 
         # Effects selectors
-        screen.blit(ui_labels[0], vec2(x, y))
-        x += ui_labels[0].width
-        for idx, name in enumerate(background_effect_names):
-            spr = effect_sprites[name]
-            if idx == self.selections[0]:
-                screen.rectangle(x, y, spr.width, spr.height)
-            screen.blit(effect_sprites[name], vec2(x, y))
-            x += spr.width + font_width
-
-        x = 0
-        y += font_height
-        screen.blit(ui_labels[1], vec2(x, y))
-        x += ui_labels[1].width
-        for idx, name in enumerate(foreground_effect_names):
-            spr = effect_sprites[name]
-            if idx == self.selections[1]:
-                screen.rectangle(x, y, spr.width, spr.height)
-            screen.blit(effect_sprites[name], vec2(x, y))
-            x += spr.width + font_width
+        for layer in (0, 1):
+            x = 0
+            screen.blit(ui_labels[layer], vec2(x, y))
+            x += ui_labels[layer].width
+            for idx, name in enumerate(effect_names[layer]):
+                spr = effect_sprites[name]
+                if idx == self.selections[layer]:
+                    screen.rectangle(x, y, spr.width, spr.height)
+                screen.blit(effect_sprites[name], vec2(x, y))
+                x += spr.width + font_width
+            y += font_height
 
         # Palette selector
         x = 0
-        y += font_height
         screen.blit(ui_labels[2], vec2(x, y))
         x += ui_labels[2].width
         for idx, preview in enumerate(preview_palette_strips):
