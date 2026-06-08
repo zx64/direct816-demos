@@ -13,11 +13,12 @@ num_ui_rows = const(3)
 
 
 def init():
-    global font_width, font_height, row_height
+    global font_width, font_height, column_gap, row_height
 
     badge.mode(HIRES)
     screen.font = rom_font.nope
     font_width, font_height = screen.measure_text("W")
+    column_gap = font_width + 2
     row_height = max(strip_height, font_height) + 1
 
     global effect_names, palette_names, num_cols
@@ -165,7 +166,7 @@ class D816Menu:
             max_left = x
             screen.rectangle(x, y, spr.width, spr.height)
             screen.blit(spr, vec2(x, y))
-            x += spr.width + font_width
+            x += spr.width + column_gap
 
             # Now fill either side with the rest of the list
 
@@ -174,7 +175,7 @@ class D816Menu:
                 idx = (idx + 1) % max_idx
                 spr = effect_sprites[effect_names[layer][idx]]
                 screen.blit(spr, vec2(x, y))
-                x += spr.width + font_width
+                x += spr.width + column_gap
 
             # Left of selection
             x = max_left
@@ -182,7 +183,7 @@ class D816Menu:
             while x > 0:
                 idx = (idx - 1) % max_idx
                 spr = effect_sprites[effect_names[layer][idx]]
-                x -= spr.width + font_width
+                x -= spr.width + column_gap
                 screen.blit(spr, vec2(x, y))
 
             y += row_height
@@ -202,20 +203,20 @@ class D816Menu:
         y += row_height
         x = screen.width // 2 - strip_width // 8
         max_left = x
-        x += strip_width // 4 + font_width
+        x += strip_width // 4 + column_gap
 
         while x < screen.width:
             idx = (idx + 1) % max_idx
             spr = preview_palette_strips[idx]
             screen.blit(spr, vec2(x, y))
-            x += strip_width + font_width
+            x += strip_width + column_gap
 
         x = max_left
         idx = self.selections[row_pal]
         while x > 0:
             idx = (idx - 1) % max_idx
             spr = preview_palette_strips[idx]
-            x -= strip_width + font_width
+            x -= strip_width + column_gap
             screen.blit(spr, vec2(x, y))
 
         y += row_height
