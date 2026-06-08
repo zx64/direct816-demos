@@ -14,9 +14,9 @@ def init():
 
     effect_names = ["abc", "defg", "hijkl", "mnopq"]
     try:
-        palette_names = [
-            filename.replace(".bin", "") for filename in os.listdir(palette_dir)
-        ]
+        palette_names = sorted(
+            [filename.replace(".bin", "") for filename in os.listdir(palette_dir)]
+        )
     except OSError:
         palette_names = ["default"]
 
