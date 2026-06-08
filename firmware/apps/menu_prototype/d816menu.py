@@ -68,11 +68,15 @@ def init():
     ]
 
 
-def make_text_sprite(text, colour=color.white):
-    size = screen.measure_text(text)
-    img = image(int(size[0]), int(size[1]))
-    img.pen = colour
+def make_text_sprite(text):
+    w, h = screen.measure_text(text)
+    w = int(w) + 1
+    h = int(h) + 1
+    img = image(w, h)
+    img.pen = color.black
     img.font = screen.font
+    img.text(text, 1, 1)
+    img.pen = color.white
     img.text(text, 0, 0)
     return img
 
