@@ -22,7 +22,7 @@ def init():
         "plasma",
         "checkerboard rotozoom",
     ]
-    foreground_effect_names = ["checkerboard rotozoom"]
+    foreground_effect_names = ["<no effect>", "checkerboard rotozoom"]
     try:
         palette_names = sorted(
             [filename.replace(".bin", "") for filename in os.listdir(palette_dir)]
