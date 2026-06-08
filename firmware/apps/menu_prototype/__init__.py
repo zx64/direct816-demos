@@ -1,5 +1,6 @@
 import d816menu
 
+d816menu.init()
 menu = d816menu.D816Menu()
 
 
