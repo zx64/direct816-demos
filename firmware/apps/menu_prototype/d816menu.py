@@ -1,17 +1,24 @@
 import os
 from array import array
 
+full_strip_width = const(256)
 strip_width = const(64)
 strip_height = const(16)
 palette_dir = "/system/assets/palettes"
 
+row_fg = const(0)
+row_bg = const(1)
+row_pal = const(2)
+num_ui_rows = const(3)
+
 
 def init():
-    global font_width, font_height
+    global font_width, font_height, row_height
 
     badge.mode(HIRES)
     screen.font = rom_font.nope
     font_width, font_height = screen.measure_text("W")
+    row_height = max(strip_height, font_height) + 1
 
     global effect_names, palette_names, num_cols
 
@@ -40,18 +47,19 @@ def init():
         len(effect_names[1]),
         len(palette_names),
     ]
+    assert len(num_cols) == num_ui_rows
 
-    global effect_sprites, preview_palette_strips, full_palette_strips, ui_labels
+    global effect_sprites, preview_palette_strips, full_palette_strips
     effect_sprites = {
         name: make_text_sprite(name) for name in set(effect_names[0] + effect_names[1])
     }
-    ui_labels = [make_text_sprite(text) for text in ["bg: ", "fg: ", "pal: "]]
 
     preview_palette_strips = [
         make_palette_strip(name, strip_width, strip_height) for name in palette_names
     ]
     full_palette_strips = [
-        make_palette_strip(name, 256, strip_height) for name in palette_names
+        make_palette_strip(name, full_strip_width, strip_height)
+        for name in palette_names
     ]
 
 
@@ -91,9 +99,6 @@ def make_palette_strip(name, w, h):
     return img
 
 
-num_ui_rows = const(3)
-
-
 class D816Menu:
     def __init__(self):
         self.selections = [0, 0, 0]
@@ -129,33 +134,85 @@ class D816Menu:
         if not self.visible:
             return
 
-        x, y = 0, 3 * screen.height // 4 - font_height // 2
-        selected_row_y = y + self.ui_row * font_height
+        # Palette is a double height row
+        y = screen.height - (num_ui_rows + 1) * row_height
+
+        selected_row_y = y + self.ui_row * row_height
+        # Draw selected row background
         screen.pen = color.navy
-        screen.rectangle(0, selected_row_y - 1, screen.width, font_height + 2)
+        if self.ui_row == 2:
+            screen.rectangle(0, selected_row_y - 1, screen.width, 2 * row_height)
+        else:
+            screen.rectangle(0, selected_row_y - 1, screen.width, row_height + 1)
+
+        y = self.draw_effect_selectors(y)
+        y = self.draw_palette_selector(y)
+
+    def draw_effect_selectors(self, y):
         screen.pen = color.green
 
-        # Effects selectors
-        for layer in (0, 1):
-            x = 0
-            screen.blit(ui_labels[layer], vec2(x, y))
-            x += ui_labels[layer].width
-            for idx, name in enumerate(effect_names[layer]):
-                spr = effect_sprites[name]
-                if idx == self.selections[layer]:
-                    screen.rectangle(x, y, spr.width, spr.height)
-                screen.blit(effect_sprites[name], vec2(x, y))
-                x += spr.width + font_width
-            y += font_height
+        for layer in (row_fg, row_bg):
+            max_idx = num_cols[layer]
 
-        # Palette selector
-        x = 0
-        screen.blit(ui_labels[2], vec2(x, y))
-        x += ui_labels[2].width
-        for idx, preview in enumerate(preview_palette_strips):
-            if idx == self.selections[2]:
-                spr = full_palette_strips[idx]
-            else:
-                spr = preview
+            # Start with selected item in centre
+            idx = self.selections[layer]
+            spr = effect_sprites[effect_names[layer][idx]]
+            x = (screen.width - spr.width) // 2
+            max_left = x
+            screen.rectangle(x, y, spr.width, spr.height)
             screen.blit(spr, vec2(x, y))
             x += spr.width + font_width
+
+            # Now fill either side with the rest of the list
+
+            # Right of selection
+            while x < screen.width:
+                idx = (idx + 1) % max_idx
+                spr = effect_sprites[effect_names[layer][idx]]
+                screen.blit(spr, vec2(x, y))
+                x += spr.width + font_width
+
+            # Left of selection
+            x = max_left
+            idx = self.selections[layer]
+            while x > 0:
+                idx = (idx - 1) % max_idx
+                spr = effect_sprites[effect_names[layer][idx]]
+                x -= spr.width + font_width
+                screen.blit(spr, vec2(x, y))
+
+            y += row_height
+
+        return y
+
+    def draw_palette_selector(self, y):
+        max_idx = num_cols[row_pal]
+        idx = self.selections[row_pal]
+
+        # First row: selected palette in full
+        x = (screen.width - full_strip_width) // 2
+        spr = full_palette_strips[idx]
+        screen.blit(spr, vec2(x, y))
+
+        # Second row: preview of other available palettes
+        y += row_height
+        x = screen.width // 2 - strip_width // 8
+        max_left = x
+        x += strip_width // 4 + font_width
+
+        while x < screen.width:
+            idx = (idx + 1) % max_idx
+            spr = preview_palette_strips[idx]
+            screen.blit(spr, vec2(x, y))
+            x += strip_width + font_width
+
+        x = max_left
+        idx = self.selections[row_pal]
+        while x > 0:
+            idx = (idx - 1) % max_idx
+            spr = preview_palette_strips[idx]
+            x -= strip_width + font_width
+            screen.blit(spr, vec2(x, y))
+
+        y += row_height
+        return y
