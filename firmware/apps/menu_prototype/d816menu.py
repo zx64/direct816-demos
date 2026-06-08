@@ -29,9 +29,13 @@ def init():
             "scrolling xor",
             "plasma",
             "checkerboard rotozoom",
+            "tunnel",
+            "starfield",
         ],
         [  # Foreground effects
             "<no effect>",
+            "bouncing balls",
+            "brownian motion",
             "checkerboard rotozoom",
         ],
     ]
