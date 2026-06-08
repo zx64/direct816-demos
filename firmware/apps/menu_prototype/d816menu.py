@@ -7,18 +7,22 @@ palette_dir = "/system/assets/palettes"
 
 
 def init():
+    global font_width, font_height
+
     badge.mode(HIRES)
     screen.font = rom_font.nope
+    font_width, font_height = screen.measure_text("W")
 
-    global effect_names, palette_names
+    global background_effect_names, foreground_effect_names, palette_names
 
-    effect_names = [
+    background_effect_names = [
         "palette cycling",
         "simple xor",
         "scrolling xor",
         "plasma",
-        "zooming checkerboards",
+        "checkerboard rotozoom",
     ]
+    foreground_effect_names = ["checkerboard rotozoom"]
     try:
         palette_names = sorted(
             [filename.replace(".bin", "") for filename in os.listdir(palette_dir)]
@@ -26,17 +30,27 @@ def init():
     except OSError:
         palette_names = ["default"]
 
-    global font_width, font_height
+    global effect_sprites, preview_palette_strips, full_palette_strips
+    effect_sprites = {
+        name: make_text_sprite(name)
+        for name in set(background_effect_names + foreground_effect_names)
+    }
 
-    font_width, font_height = screen.measure_text("W")
-
-    global preview_palette_strips, full_palette_strips
     preview_palette_strips = [
         make_palette_strip(name, strip_width, strip_height) for name in palette_names
     ]
     full_palette_strips = [
         make_palette_strip(name, 256, strip_height) for name in palette_names
     ]
+
+
+def make_text_sprite(text, colour=color.white):
+    size = screen.measure_text(text)
+    img = image(int(size[0]), int(size[1]))
+    img.pen = colour
+    img.font = screen.font
+    img.text(text, 0, 0)
+    return img
 
 
 def make_palette_strip(name, w, h):
@@ -87,14 +101,14 @@ class D816Menu:
     def left(self):
         if not self.visible:
             self.visible = True
-        self.effect_idx = (self.effect_idx - 1) % len(effect_names)
-        print(effect_names[self.effect_idx])
+        self.effect_idx = (self.effect_idx - 1) % len(background_effect_names)
+        print(background_effect_names[self.effect_idx])
 
     def right(self):
         if not self.visible:
             self.visible = True
-        self.effect_idx = (self.effect_idx + 1) % len(effect_names)
-        print(effect_names[self.effect_idx])
+        self.effect_idx = (self.effect_idx + 1) % len(background_effect_names)
+        print(background_effect_names[self.effect_idx])
 
     def ok(self):
         self.visible = not self.visible
@@ -103,18 +117,17 @@ class D816Menu:
         if not self.visible:
             return
 
+        # Effects selector
         screen.pen = color.grey
         x, y = 0, 3 * screen.height // 4 - font_height // 2
-        for idx, name in enumerate(effect_names):
-            w, h = screen.measure_text(name)
+        for idx, name in enumerate(background_effect_names):
+            spr = effect_sprites[name]
             if idx == self.effect_idx:
-                screen.rectangle(x, y, w, h)
-                screen.pen = color.white
-            screen.text(name, x, y)
-            if idx == self.effect_idx:
-                screen.pen = color.grey
-            x += w + font_width
+                screen.rectangle(x, y, spr.width, spr.height)
+            screen.blit(effect_sprites[name], vec2(x, y))
+            x += spr.width + font_width
 
+        # Palette selector
         r = rect(screen.width - strip_width - 2, 0, strip_width, strip_height)
         for idx, preview in enumerate(preview_palette_strips):
             if idx == self.palette_idx:
