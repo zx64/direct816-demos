@@ -127,9 +127,9 @@ class D816Menu:
 
         x, y = 0, 3 * screen.height // 4 - font_height // 2
         selected_row_y = y + self.ui_row * font_height
+        screen.pen = color.navy
+        screen.rectangle(0, selected_row_y - 1, screen.width, font_height + 2)
         screen.pen = color.green
-        screen.rectangle(0, selected_row_y, screen.width, font_height)
-        screen.pen = color.orange
 
         # Effects selectors
         screen.blit(ui_labels[0], vec2(x, y))
