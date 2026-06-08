@@ -168,7 +168,7 @@ class D816Menu:
             spr = effect_sprites[effect_names[layer][idx]]
             x = (screen.width - spr.width) // 2
             max_left = x
-            screen.rectangle(x, y, spr.width, spr.height)
+            screen.rectangle(x - 1, y - 1, spr.width + 2, spr.height + 2)
             screen.blit(spr, vec2(x, y))
             x += spr.width + column_gap
 
