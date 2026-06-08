@@ -12,7 +12,13 @@ def init():
 
     global effect_names, palette_names
 
-    effect_names = ["abc", "defg", "hijkl", "mnopq"]
+    effect_names = [
+        "palette cycling",
+        "simple xor",
+        "scrolling xor",
+        "plasma",
+        "zooming checkerboards",
+    ]
     try:
         palette_names = sorted(
             [filename.replace(".bin", "") for filename in os.listdir(palette_dir)]
