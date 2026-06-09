@@ -5,7 +5,7 @@ full_strip_width = const(256)
 preview_strip_width = const(64)
 strip_height = const(16)
 strip_gap = 4
-palette_dir = "/system/assets/palettes"
+palette_dir = "/system/assets/palettes/gradients"
 
 row_bg_colours = [
     color.rgb(0x30, 0x34, 0x6D, 0xFF),  # color.navy
