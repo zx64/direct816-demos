@@ -6,6 +6,37 @@ strip_width = const(64)
 strip_height = const(16)
 palette_dir = "/system/assets/palettes"
 
+
+class TextStrip:
+    def __init__(self, texts):
+        if not texts:
+            raise ValueError("Empty list")
+
+        starts = [0] * len(texts)
+        widths = [0] * len(texts)
+        x = 0
+        h = int(screen.measure_text(texts[0])[1] + 1)
+        for idx, text in enumerate(texts):
+            w = int(screen.measure_text(text)[0] + 1)
+            starts[idx] = x
+            widths[idx] = w
+
+            x += w + column_gap
+
+        img = image(x, h)
+        img.font = screen.font
+        for idx, text in enumerate(texts):
+            img.pen = color.black
+            img.text(text, starts[idx] + 1, 1)
+            img.pen = color.white
+            img.text(text, starts[idx], 0)
+
+        self.img = img
+        self.starts = starts
+        self.widths = widths
+        self.height = h
+
+
 row_fg = const(0)
 row_bg = const(1)
 row_pal = const(2)
@@ -18,8 +49,8 @@ def init():
     badge.mode(HIRES)
     screen.font = rom_font.nope
     font_width, font_height = screen.measure_text("W")
-    column_gap = font_width + 2
-    row_height = max(strip_height, font_height) + 1
+    column_gap = int(font_width + 2)
+    row_height = int(max(strip_height, font_height) + 1)
 
     global effect_names, palette_names, num_cols
 
@@ -54,10 +85,8 @@ def init():
     ]
     assert len(num_cols) == num_ui_rows
 
-    global effect_sprites, preview_palette_strips, full_palette_strips
-    effect_sprites = {
-        name: make_text_sprite(name) for name in set(effect_names[0] + effect_names[1])
-    }
+    global effect_strips, preview_palette_strips, full_palette_strips
+    effect_strips = [TextStrip(effect_names[0]), TextStrip(effect_names[1])]
 
     preview_palette_strips = [
         make_palette_strip(name, strip_width, strip_height) for name in palette_names
@@ -66,19 +95,6 @@ def init():
         make_palette_strip(name, full_strip_width, strip_height)
         for name in palette_names
     ]
-
-
-def make_text_sprite(text):
-    w, h = screen.measure_text(text)
-    w = int(w) + 1
-    h = int(h) + 1
-    img = image(w, h)
-    img.pen = color.black
-    img.font = screen.font
-    img.text(text, 1, 1)
-    img.pen = color.white
-    img.text(text, 0, 0)
-    return img
 
 
 def make_palette_strip(name, w, h):
@@ -161,34 +177,25 @@ class D816Menu:
         screen.pen = color.green
 
         for layer in (row_fg, row_bg):
-            max_idx = num_cols[layer]
+            strip = effect_strips[layer]
 
             # Start with selected item in centre
             idx = self.selections[layer]
-            spr = effect_sprites[effect_names[layer][idx]]
-            x = (screen.width - spr.width) // 2
-            max_left = x
-            screen.rectangle(x - 1, y - 1, spr.width + 2, spr.height + 2)
-            screen.blit(spr, vec2(x, y))
-            x += spr.width + column_gap
+            w = strip.widths[idx]
+            start = strip.starts[idx]
+            x = (screen.width - w) // 2
+            screen.rectangle(x - 1, y - 1, w + 2, strip.height + 2)
+            x -= start
 
-            # Now fill either side with the rest of the list
+            screen.blit(strip.img, vec2(x, y))
 
-            # Right of selection
-            while x < screen.width:
-                idx = (idx + 1) % max_idx
-                spr = effect_sprites[effect_names[layer][idx]]
-                screen.blit(spr, vec2(x, y))
-                x += spr.width + column_gap
-
-            # Left of selection
-            x = max_left
-            idx = self.selections[layer]
-            while x > 0:
-                idx = (idx - 1) % max_idx
-                spr = effect_sprites[effect_names[layer][idx]]
-                x -= spr.width + column_gap
-                screen.blit(spr, vec2(x, y))
+            # Make the strip wrap to fill any gaps either side after scrolling
+            if x > 0:
+                x -= strip.img.width
+                screen.blit(strip.img, vec2(x, y))
+            elif x + strip.img.width < screen.width:
+                x += strip.img.width
+                screen.blit(strip.img, vec2(x, y))
 
             y += row_height
 
