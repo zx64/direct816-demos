@@ -18,6 +18,10 @@ row_bg_colours = [
 row_bg_change_frames = const(4)
 assert row_bg_change_frames == len(row_bg_colours) - 1
 
+# slower movement is easier to check
+# row_fg_change_frames = const(60)
+row_fg_change_frames = const(8)
+
 
 class TextStrip:
     def __init__(self, texts):
@@ -158,6 +162,7 @@ class D816Menu:
         self.previous_selections = [0, 0, 0]
 
         self.row_bg_change_timer = 0
+        self.row_fg_change_timer = 0
 
         self.visible = True
 
@@ -165,12 +170,14 @@ class D816Menu:
         if not self.visible:
             self.visible = True
         self.row_bg_change_timer = row_bg_change_frames
+        self.row_fg_change_timer = 0
         self.ui_row = (self.ui_row - 1) % num_ui_rows
 
     def down(self):
         if not self.visible:
             self.visible = True
         self.row_bg_change_timer = row_bg_change_frames
+        self.row_fg_change_timer = 0
         self.ui_row = (self.ui_row + 1) % num_ui_rows
 
     def left(self):
@@ -178,6 +185,7 @@ class D816Menu:
             self.visible = True
         row = self.ui_row
         self.previous_selections[row] = self.selections[row]
+        self.row_fg_change_timer = row_fg_change_frames
         self.selections[row] = (self.selections[row] - 1) % num_cols[row]
 
     def right(self):
@@ -185,6 +193,7 @@ class D816Menu:
             self.visible = True
         row = self.ui_row
         self.previous_selections[row] = self.selections[row]
+        self.row_fg_change_timer = row_fg_change_frames
         self.selections[row] = (self.selections[row] + 1) % num_cols[row]
 
     def ok(self):
@@ -222,10 +231,23 @@ class D816Menu:
         for layer in (row_fg, row_bg, row_pal):
             strip = menu_strips[layer]
 
-            # Start with selected item in centre
+            # Shift the strip so the selected item is in the middle
             idx = self.selections[layer]
             w = strip.widths[idx]
             start = strip.starts[idx]
+            if layer == self.ui_row and self.row_fg_change_timer > 0:
+                prev_idx = self.previous_selections[layer]
+                # Have to create fake start positions when wrapping around from either end
+                if idx == 0 and prev_idx != 1:
+                    prev_start = start - strip.widths[prev_idx]
+                elif prev_idx == 0 and idx != 1:
+                    prev_start = start + strip.widths[prev_idx]
+                else:
+                    prev_start = strip.starts[prev_idx]
+                delta = (prev_start - start) / row_fg_change_frames
+                start += delta * self.row_fg_change_timer
+                self.row_fg_change_timer -= 1
+
             x = (screen.width - w) // 2
             screen.rectangle(x - 1, y - 1, w + 2, strip.height + 2)
             x -= start
