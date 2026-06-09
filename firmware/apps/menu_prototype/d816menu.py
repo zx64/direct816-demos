@@ -2,8 +2,9 @@ import os
 from array import array
 
 full_strip_width = const(256)
-strip_width = const(64)
+preview_strip_width = const(64)
 strip_height = const(16)
+strip_gap = 4
 palette_dir = "/system/assets/palettes"
 
 
@@ -34,6 +35,46 @@ class TextStrip:
         self.img = img
         self.starts = starts
         self.widths = widths
+        self.height = h
+
+
+class PaletteStrip:
+    def __init__(self, palettes, w, h, gap):
+        if not palettes:
+            raise ValueError("Empty list")
+        if w < 1:
+            raise ValueError("Invalid width")
+        if h < 1:
+            raise ValueError("Invalid height")
+
+        img = image((gap + w) * len(palettes), h)
+        starts = [(gap + w) * i for i in range(len(palettes))]
+        for idx, palname in enumerate(palettes):
+            palette = array("H", [0] * 256)
+            try:
+                filename = f"{palette_dir}/{palname}.bin"
+                with open(filename, "rb") as f:
+                    size = f.readinto(palette)
+                    if size > 512:
+                        raise ValueError(
+                            f"Palette {palname} is too large: {size / 2} > 256"
+                        )
+            except OSError as err:
+                raise OSError(f"Error opening {palname}") from err
+
+            x = starts[idx]
+            for pal_idx in range(0, len(palette), len(palette) // w):
+                rgb565 = palette[pal_idx]
+                r = (rgb565 & 0b11111_000000_00000) >> 8
+                g = (rgb565 & 0b00000_111111_00000) >> 3
+                b = (rgb565 & 0b00000_000000_11111) << 3
+                img.pen = color.rgb(r, g, b)
+                img.rectangle(x, 0, 1, h)
+                x += 1
+
+        self.img = img
+        self.starts = starts
+        self.widths = [w for _ in range(len(palettes))]
         self.height = h
 
 
@@ -76,7 +117,10 @@ def init():
             [filename.replace(".bin", "") for filename in os.listdir(palette_dir)]
         )
     except OSError:
-        palette_names = ["default"]
+        print(
+            "Could not find palette directory, make sure you have copied the assets directory!"
+        )
+        raise
 
     num_cols = [
         len(effect_names[0]),
@@ -85,43 +129,14 @@ def init():
     ]
     assert len(num_cols) == num_ui_rows
 
-    global effect_strips, preview_palette_strips, full_palette_strips
-    effect_strips = [TextStrip(effect_names[0]), TextStrip(effect_names[1])]
-
-    preview_palette_strips = [
-        make_palette_strip(name, strip_width, strip_height) for name in palette_names
-    ]
-    full_palette_strips = [
-        make_palette_strip(name, full_strip_width, strip_height)
-        for name in palette_names
+    global menu_strips, full_palettes
+    menu_strips = [
+        TextStrip(effect_names[0]),
+        TextStrip(effect_names[1]),
+        PaletteStrip(palette_names, preview_strip_width, strip_height, strip_gap),
     ]
 
-
-def make_palette_strip(name, w, h):
-    img = image(w, h)
-    palette = array("H", [0] * 256)
-    try:
-        with open(f"{palette_dir}/{name}.bin", "rb") as f:
-            size = f.readinto(palette)
-            if size > 512:
-                raise ValueError(f"Palette is too large: {size / 2} > 256")
-    except OSError:
-        img.pen = color.red
-        img.font = screen.font
-        img.text("ERR", 0, 0)
-        return img
-
-    x = 0
-    for pal_idx in range(0, len(palette), len(palette) // w):
-        rgb565 = palette[pal_idx]
-        r = (rgb565 & 0b11111_000000_00000) >> 8
-        g = (rgb565 & 0b00000_111111_00000) >> 3
-        b = (rgb565 & 0b00000_000000_11111) << 3
-        img.pen = color.rgb(r, g, b)
-        img.rectangle(x, 0, 1, h)
-        x += 1
-
-    return img
+    full_palettes = PaletteStrip(palette_names, full_strip_width, strip_height, 0)
 
 
 class D816Menu:
@@ -170,14 +185,14 @@ class D816Menu:
         else:
             screen.rectangle(0, selected_row_y - 1, screen.width, row_height + 1)
 
-        y = self.draw_effect_selectors(y)
-        y = self.draw_palette_selector(y)
+        y = self.draw_selectors(y)
+        self.draw_current_palette(y)
 
-    def draw_effect_selectors(self, y):
+    def draw_selectors(self, y):
         screen.pen = color.green
 
-        for layer in (row_fg, row_bg):
-            strip = effect_strips[layer]
+        for layer in (row_fg, row_bg, row_pal):
+            strip = menu_strips[layer]
 
             # Start with selected item in centre
             idx = self.selections[layer]
@@ -201,34 +216,10 @@ class D816Menu:
 
         return y
 
-    def draw_palette_selector(self, y):
-        max_idx = num_cols[row_pal]
+    def draw_current_palette(self, y):
         idx = self.selections[row_pal]
-
-        # First row: selected palette in full
-        x = (screen.width - full_strip_width) // 2
-        spr = full_palette_strips[idx]
-        screen.blit(spr, vec2(x, y))
-
-        # Second row: preview of other available palettes
-        y += row_height
-        x = screen.width // 2 - strip_width // 8
-        max_left = x
-        x += strip_width // 4 + column_gap
-
-        while x < screen.width:
-            idx = (idx + 1) % max_idx
-            spr = preview_palette_strips[idx]
-            screen.blit(spr, vec2(x, y))
-            x += strip_width + column_gap
-
-        x = max_left
-        idx = self.selections[row_pal]
-        while x > 0:
-            idx = (idx - 1) % max_idx
-            spr = preview_palette_strips[idx]
-            x -= strip_width + column_gap
-            screen.blit(spr, vec2(x, y))
-
-        y += row_height
-        return y
+        src = rect(full_palettes.starts[idx], 0, full_strip_width, strip_height)
+        dst = rect(
+            (screen.width - full_strip_width) // 2, y, full_strip_width, strip_height
+        )
+        screen.blit(full_palettes.img, src, dst)
