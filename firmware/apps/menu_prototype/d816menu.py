@@ -18,9 +18,8 @@ row_bg_colours = [
 row_bg_change_frames = const(4)
 assert row_bg_change_frames == len(row_bg_colours) - 1
 
-# slower movement is easier to check
-# row_fg_change_frames = const(60)
-row_fg_change_frames = const(8)
+# scroll by this many pixels per frame
+row_fg_scroll_speed = const(10)
 
 
 class TextStrip:
@@ -162,7 +161,7 @@ class D816Menu:
         self.previous_selections = [0, 0, 0]
 
         self.row_bg_change_timer = 0
-        self.row_fg_change_timer = 0
+        self.row_fg_scroll_frames = 0
 
         self.visible = True
 
@@ -170,31 +169,43 @@ class D816Menu:
         if not self.visible:
             self.visible = True
         self.row_bg_change_timer = row_bg_change_frames
-        self.row_fg_change_timer = 0
+        self.row_fg_scroll_frames = 0
         self.ui_row = (self.ui_row - 1) % num_ui_rows
 
     def down(self):
         if not self.visible:
             self.visible = True
         self.row_bg_change_timer = row_bg_change_frames
-        self.row_fg_change_timer = 0
+        self.row_fg_scroll_frames = 0
         self.ui_row = (self.ui_row + 1) % num_ui_rows
 
     def left(self):
-        if not self.visible:
-            self.visible = True
-        row = self.ui_row
-        self.previous_selections[row] = self.selections[row]
-        self.row_fg_change_timer = row_fg_change_frames
-        self.selections[row] = (self.selections[row] - 1) % num_cols[row]
+        self._scroll_menu(left=True)
 
     def right(self):
+        self._scroll_menu(left=False)
+
+    def _scroll_menu(self, left):
         if not self.visible:
             self.visible = True
+        step = -1 if left else 1
         row = self.ui_row
-        self.previous_selections[row] = self.selections[row]
-        self.row_fg_change_timer = row_fg_change_frames
-        self.selections[row] = (self.selections[row] + 1) % num_cols[row]
+        prev = self.previous_selections[row] = self.selections[row]
+        idx = self.selections[row] = (self.selections[row] + step) % num_cols[row]
+
+        strip = menu_strips[row]
+
+        new_start = strip.starts[idx]
+        if left and prev == 0:
+            prev_start = new_start + strip.widths[prev]
+        elif not left and idx == 0:
+            prev_start = new_start - strip.widths[prev]
+        else:
+            prev_start = strip.starts[prev]
+
+        self.row_fg_scroll_base = new_start
+        self.row_fg_scroll_frames = abs(prev_start - new_start) // row_fg_scroll_speed
+        self.row_fg_scroll_step = -step * row_fg_scroll_speed
 
     def ok(self):
         self.visible = not self.visible
@@ -234,22 +245,18 @@ class D816Menu:
             # Shift the strip so the selected item is in the middle
             idx = self.selections[layer]
             w = strip.widths[idx]
-            start = strip.starts[idx]
-            if layer == self.ui_row and self.row_fg_change_timer > 0:
-                prev_idx = self.previous_selections[layer]
-                # Have to create fake start positions when wrapping around from either end
-                if idx == 0 and prev_idx != 1:
-                    prev_start = start - strip.widths[prev_idx]
-                elif prev_idx == 0 and idx != 1:
-                    prev_start = start + strip.widths[prev_idx]
-                else:
-                    prev_start = strip.starts[prev_idx]
-                delta = (prev_start - start) / row_fg_change_frames
-                start += delta * self.row_fg_change_timer
-                self.row_fg_change_timer -= 1
-
             x = (screen.width - w) // 2
-            screen.rectangle(x - 1, y - 1, w + 2, strip.height + 2)
+
+            if layer == self.ui_row and self.row_fg_scroll_frames > 0:
+                start = (
+                    self.row_fg_scroll_base
+                    + self.row_fg_scroll_step * self.row_fg_scroll_frames
+                )
+                self.row_fg_scroll_frames -= 1
+            else:
+                start = strip.starts[idx]
+                screen.rectangle(x - 1, y - 1, w + 2, strip.height + 2)
+
             x -= start
 
             screen.blit(strip.img, vec2(x, y))
