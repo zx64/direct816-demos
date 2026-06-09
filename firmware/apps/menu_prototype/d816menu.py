@@ -7,7 +7,7 @@ strip_height = const(16)
 strip_gap = 4
 palette_dir = "/system/assets/palettes"
 
-row_colours = [
+row_bg_colours = [
     color.rgb(0x30, 0x34, 0x6D, 0xFF),  # color.navy
     color.rgb(0x40, 0x44, 0x7D, 0xFF),
     color.rgb(0x50, 0x54, 0x8D, 0xFF),
@@ -15,8 +15,8 @@ row_colours = [
     color.rgb(0x70, 0x74, 0xAD, 0xFF),  # start of flash
 ]
 
-row_change_frames = const(4)
-assert row_change_frames == len(row_colours) - 1
+row_bg_change_frames = const(4)
+assert row_bg_change_frames == len(row_bg_colours) - 1
 
 
 class TextStrip:
@@ -157,20 +157,20 @@ class D816Menu:
 
         self.previous_selections = [0, 0, 0]
 
-        self.row_change_timer = 0
+        self.row_bg_change_timer = 0
 
         self.visible = True
 
     def up(self):
         if not self.visible:
             self.visible = True
-        self.row_change_timer = row_change_frames
+        self.row_bg_change_timer = row_bg_change_frames
         self.ui_row = (self.ui_row - 1) % num_ui_rows
 
     def down(self):
         if not self.visible:
             self.visible = True
-        self.row_change_timer = row_change_frames
+        self.row_bg_change_timer = row_bg_change_frames
         self.ui_row = (self.ui_row + 1) % num_ui_rows
 
     def left(self):
@@ -201,11 +201,11 @@ class D816Menu:
         y = self.menu_base_y()
 
         # Draw selected row background
-        screen.pen = row_colours[self.row_change_timer]
+        screen.pen = row_bg_colours[self.row_bg_change_timer]
 
         # Flash the new row for one frame
-        if self.row_change_timer > 0:
-            self.row_change_timer -= 1
+        if self.row_bg_change_timer > 0:
+            self.row_bg_change_timer -= 1
 
         selected_row_y = y + self.ui_row * row_height - 1
         if self.ui_row == 2:
