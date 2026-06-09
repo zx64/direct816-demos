@@ -7,6 +7,17 @@ strip_height = const(16)
 strip_gap = 4
 palette_dir = "/system/assets/palettes"
 
+row_colours = [
+    color.rgb(0x30, 0x34, 0x6D, 0xFF),  # color.navy
+    color.rgb(0x40, 0x44, 0x7D, 0xFF),
+    color.rgb(0x50, 0x54, 0x8D, 0xFF),
+    color.rgb(0x60, 0x64, 0x9D, 0xFF),
+    color.rgb(0x70, 0x74, 0xAD, 0xFF),  # start of flash
+]
+
+row_change_frames = const(4)
+assert row_change_frames == len(row_colours) - 1
+
 
 class TextStrip:
     def __init__(self, texts):
@@ -143,16 +154,21 @@ class D816Menu:
     def __init__(self):
         self.selections = [0, 0, 0]
         self.ui_row = 0
+
+        self.row_change_timer = 0
+
         self.visible = True
 
     def up(self):
         if not self.visible:
             self.visible = True
+        self.row_change_timer = row_change_frames
         self.ui_row = (self.ui_row - 1) % num_ui_rows
 
     def down(self):
         if not self.visible:
             self.visible = True
+        self.row_change_timer = row_change_frames
         self.ui_row = (self.ui_row + 1) % num_ui_rows
 
     def left(self):
@@ -170,20 +186,28 @@ class D816Menu:
     def ok(self):
         self.visible = not self.visible
 
+    def menu_base_y(self):
+        # Palette is a double height row
+        return screen.height - (num_ui_rows + 1) * row_height
+
     def display(self):
         if not self.visible:
             return
 
-        # Palette is a double height row
-        y = screen.height - (num_ui_rows + 1) * row_height
+        y = self.menu_base_y()
 
-        selected_row_y = y + self.ui_row * row_height
         # Draw selected row background
-        screen.pen = color.navy
+        screen.pen = row_colours[self.row_change_timer]
+
+        # Flash the new row for one frame
+        if self.row_change_timer > 0:
+            self.row_change_timer -= 1
+
+        selected_row_y = y + self.ui_row * row_height - 1
         if self.ui_row == 2:
-            screen.rectangle(0, selected_row_y - 1, screen.width, 2 * row_height)
+            screen.rectangle(0, selected_row_y, screen.width, 2 * row_height)
         else:
-            screen.rectangle(0, selected_row_y - 1, screen.width, row_height + 1)
+            screen.rectangle(0, selected_row_y, screen.width, row_height + 1)
 
         y = self.draw_selectors(y)
         self.draw_current_palette(y)
