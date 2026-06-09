@@ -214,7 +214,7 @@ class D816Menu:
             screen.rectangle(0, selected_row_y, screen.width, row_height + 1)
 
         y = self.draw_selectors(y)
-        self.draw_current_palette(y)
+        y = self.draw_current_palette(y)
 
     def draw_selectors(self, y):
         screen.pen = color.green
@@ -251,3 +251,5 @@ class D816Menu:
             (screen.width - full_strip_width) // 2, y, full_strip_width, strip_height
         )
         screen.blit(full_palettes.img, src, dst)
+
+        return y + strip_height
