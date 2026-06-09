@@ -230,6 +230,10 @@ class D816Menu:
             screen.rectangle(x - 1, y - 1, w + 2, strip.height + 2)
             x -= start
 
+            # Example of making the current menu scroll
+            if layer == self.ui_row:
+                x -= (badge.ticks // 4) % strip.img.width
+
             screen.blit(strip.img, vec2(x, y))
 
             # Make the strip wrap to fill any gaps either side after scrolling
