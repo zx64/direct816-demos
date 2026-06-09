@@ -155,6 +155,8 @@ class D816Menu:
         self.selections = [0, 0, 0]
         self.ui_row = 0
 
+        self.previous_selections = [0, 0, 0]
+
         self.row_change_timer = 0
 
         self.visible = True
@@ -175,12 +177,14 @@ class D816Menu:
         if not self.visible:
             self.visible = True
         row = self.ui_row
+        self.previous_selections[row] = self.selections[row]
         self.selections[row] = (self.selections[row] - 1) % num_cols[row]
 
     def right(self):
         if not self.visible:
             self.visible = True
         row = self.ui_row
+        self.previous_selections[row] = self.selections[row]
         self.selections[row] = (self.selections[row] + 1) % num_cols[row]
 
     def ok(self):
