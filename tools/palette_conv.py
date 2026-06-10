@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
-from array import array  # noqa: F401
+import math
+from array import array
+from typing import Tuple
+from PIL import Image, ImageDraw
 
 # TODO:
 # Extract my palette conversion code from other projects
@@ -10,3 +13,45 @@ from array import array  # noqa: F401
 # between two colours
 #
 # Palette expansion for smaller palettes (smoother blends etc.)
+
+
+def pack_rgb565(r: int, g: int, b: int) -> int:
+    return ((r & 0b11111000) << 8 | (g & 0b11111100) << 3 | b >> 3) & 0xFFFF
+
+
+def unpack_rgb565(rgb565: int) -> Tuple[int, int, int]:
+    r = (rgb565 & 0b11111_000000_00000) >> 8
+    g = (rgb565 & 0b00000_111111_00000) >> 3
+    b = (rgb565 & 0b00000_000000_11111) << 3
+    return r, g, b
+
+
+def preview_palette(palette: array, tile_size=16, gutter=2) -> Image.Image:
+    tiles_per_line = math.ceil(math.sqrt(len(palette)))
+    tile_step = tile_size + gutter
+    grid_side_length = tiles_per_line * tile_step
+    header_step = 18
+    image_side_length = grid_side_length + header_step
+
+    im = Image.new("RGB", (image_side_length, image_side_length))
+    draw = ImageDraw.Draw(im)
+    for i in range(tiles_per_line):
+        draw.text(((i + 1) * header_step, 0), f"{i:02X}")
+        draw.text((0, (i + 1) * header_step), f"{i * tiles_per_line:02X}")
+    x, y = header_step, header_step
+    for rgb565 in palette:
+        draw.rectangle([x, y, x + tile_size, y + tile_size], fill=unpack_rgb565(rgb565))
+        x += tile_step
+        if x >= header_step + grid_side_length:
+            x = header_step
+            y += tile_step
+    im.show()
+    return im
+
+
+greys = array("H", [pack_rgb565(i, i, i) for i in range(256)])
+preview_palette(greys)
+tmp = array("H", [0] * 256)
+with open("../firmware/assets/palettes/gradients/viridis.bin", "rb") as f:
+    f.readinto(tmp)
+preview_palette(tmp)
