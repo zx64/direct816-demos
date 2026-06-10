@@ -64,6 +64,10 @@ def preview_palette(palette: array, tile_size=16, gutter=2) -> Image.Image:
 
 
 def set_rgb(r: int, g: int, b: int) -> str:
+    """
+    Generates the terminal codes to set background to given colour with a basic attempt at
+    making the foreground readable (fails when the colour is near grey)
+    """
     return f"\x1b[38;2;{255 - r};{255 - g};{255 - b}m\x1b[48;2;{r};{g};{b}m"
 
 
