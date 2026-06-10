@@ -92,9 +92,10 @@ def print_palette(palette: array):
         print()
 
 
-greys = array("H", [pack_rgb565(i, i, i) for i in range(256)])
-print_palette(greys)
-tmp = array("H", [0] * 256)
-for i in range(256):
-    tmp[i] = blend_rgb565(0, 0xFFFF, i / 255.0)
-print_palette(tmp)
+if __name__ == "__main__":
+    greys = array("H", [pack_rgb565(i, i, i) for i in range(256)])
+    print_palette(greys)
+    tmp = array("H", [0] * 256)
+    for i in range(256):
+        tmp[i] = blend_rgb565(0, 0xFFFF, i / 255.0)
+    print_palette(tmp)
