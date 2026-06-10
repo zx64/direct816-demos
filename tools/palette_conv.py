@@ -63,12 +63,25 @@ def preview_palette(palette: array, tile_size=16, gutter=2) -> Image.Image:
     return im
 
 
+def relative_luminance(r: int, g: int, b: int) -> float:
+    """
+    https://en.wikipedia.org/wiki/Relative_luminance
+    """
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
 def set_rgb(r: int, g: int, b: int) -> str:
     """
-    Generates the terminal codes to set background to given colour with a basic attempt at
-    making the foreground readable (fails when the colour is near grey)
+    Generates the terminal codes to set background to given colour and foreground to
+    something readable.
+
+    Foreground colour is picked according to a simple threshold
     """
-    return f"\x1b[38;2;{255 - r};{255 - g};{255 - b}m\x1b[48;2;{r};{g};{b}m"
+    if relative_luminance(r, g, b) < 128:
+        fg = 255
+    else:
+        fg = 0
+    return f"\x1b[38;2;{fg};{fg};{fg}m\x1b[48;2;{r};{g};{b}m"
 
 
 reset_rgb = "\x1b[39m\x1b[49m"
