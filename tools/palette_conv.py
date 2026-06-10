@@ -62,9 +62,35 @@ def preview_palette(palette: array, tile_size=16, gutter=2) -> Image.Image:
     im.show()
     return im
 
+
+def set_rgb(r: int, g: int, b: int) -> str:
+    return f"\x1b[38;2;{255 - r};{255 - g};{255 - b}m\x1b[48;2;{r};{g};{b}m"
+
+
+reset_rgb = "\x1b[39m\x1b[49m"
+
+
+def print_palette(palette: array):
+    tiles_per_line = math.ceil(math.sqrt(len(palette)))
+
+    print("   ", end="")
+    for column in range(tiles_per_line):
+        print(f"  {column:02X} ", end="")
+    print()
+    idx = 0
+    for row in range(tiles_per_line):
+        print(f"{row * tiles_per_line:02X} ", end="")
+        for _ in range(tiles_per_line):
+            rgb565 = palette[idx]
+            r, g, b = unpack_rgb565(rgb565)
+            print(f"{set_rgb(r, g, b)}{palette[idx]:04X}{reset_rgb} ", end="")
+            idx += 1
+        print()
+
+
 greys = array("H", [pack_rgb565(i, i, i) for i in range(256)])
-preview_palette(greys)
+print_palette(greys)
 tmp = array("H", [0] * 256)
 for i in range(256):
     tmp[i] = blend_rgb565(0, 0xFFFF, i / 255.0)
-preview_palette(tmp)
+print_palette(tmp)
