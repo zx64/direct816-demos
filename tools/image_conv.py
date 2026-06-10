@@ -45,7 +45,7 @@ def main():
 def convert_image_d16(filename: str) -> array:
     im = Image.open(filename)
     if im.mode != "RGB":
-        im.convert("RGB")
+        im = im.convert("RGB")
     w, h = im.size
     result = array("H", [0] * (w * h + 2))
     result[0] = w
