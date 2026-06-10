@@ -100,7 +100,7 @@ def print_palette(palette: array):
         for _ in range(tiles_per_line):
             rgb565 = palette[idx]
             r, g, b = unpack_rgb565(rgb565)
-            print(f"{set_rgb(r, g, b)}{palette[idx]:04X}{reset_rgb} ", end="")
+            print(f"{set_rgb(r, g, b)}{rgb565:04X}{reset_rgb} ", end="")
             idx += 1
         print()
 
