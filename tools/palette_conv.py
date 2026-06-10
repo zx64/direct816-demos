@@ -26,17 +26,17 @@ def unpack_rgb565(rgb565: int) -> Tuple[int, int, int]:
     return r, g, b
 
 
-def lerp(a: float, b: float, t: float) -> float:
-    return a + (b - a) * t
+def lerp(a: int, b: int, t: float) -> int:
+    return int((a & 0xFF) + ((b & 0xFF) - (a & 0xFF)) * t)
 
 
 def blend_rgb565(c1: int, c2: int, alpha: float) -> int:
     r1, g1, b1 = unpack_rgb565(c1)
     r2, g2, b2 = unpack_rgb565(c2)
     return pack_rgb565(
-        int(lerp(r1, r2, alpha)),
-        int(lerp(g1, g2, alpha)),
-        int(lerp(b1, b2, alpha)),
+        lerp(r1, r2, alpha),
+        lerp(g1, g2, alpha),
+        lerp(b1, b2, alpha),
     )
 
 
