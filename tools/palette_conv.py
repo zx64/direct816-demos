@@ -26,6 +26,20 @@ def unpack_rgb565(rgb565: int) -> Tuple[int, int, int]:
     return r, g, b
 
 
+def lerp(a: float, b: float, t: float) -> float:
+    return a + (b - a) * t
+
+
+def blend_rgb565(c1: int, c2: int, alpha: float) -> int:
+    r1, g1, b1 = unpack_rgb565(c1)
+    r2, g2, b2 = unpack_rgb565(c2)
+    return pack_rgb565(
+        int(lerp(r1, r2, alpha)),
+        int(lerp(g1, g2, alpha)),
+        int(lerp(b1, b2, alpha)),
+    )
+
+
 def preview_palette(palette: array, tile_size=16, gutter=2) -> Image.Image:
     tiles_per_line = math.ceil(math.sqrt(len(palette)))
     tile_step = tile_size + gutter
@@ -48,10 +62,9 @@ def preview_palette(palette: array, tile_size=16, gutter=2) -> Image.Image:
     im.show()
     return im
 
-
 greys = array("H", [pack_rgb565(i, i, i) for i in range(256)])
 preview_palette(greys)
 tmp = array("H", [0] * 256)
-with open("../firmware/assets/palettes/gradients/viridis.bin", "rb") as f:
-    f.readinto(tmp)
+for i in range(256):
+    tmp[i] = blend_rgb565(0, 0xFFFF, i / 255.0)
 preview_palette(tmp)
