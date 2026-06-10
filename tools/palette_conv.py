@@ -2,7 +2,6 @@
 
 import math
 from array import array
-from typing import Tuple
 from PIL import Image, ImageDraw
 
 # TODO:
@@ -19,7 +18,7 @@ def pack_rgb565(r: int, g: int, b: int) -> int:
     return ((r & 0b11111000) << 8 | (g & 0b11111100) << 3 | b >> 3) & 0xFFFF
 
 
-def unpack_rgb565(rgb565: int) -> Tuple[int, int, int]:
+def unpack_rgb565(rgb565: int) -> tuple[int, int, int]:
     r = (rgb565 & 0b11111_000000_00000) >> 8
     g = (rgb565 & 0b00000_111111_00000) >> 3
     b = (rgb565 & 0b00000_000000_11111) << 3
