@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import math
+import itertools
 from array import array
 from PIL import Image, ImageDraw
 
@@ -86,6 +87,14 @@ def set_rgb(r: int, g: int, b: int) -> str:
 reset_rgb = "\x1b[39m\x1b[49m"
 
 
+def with_rgb(s: str, r: int, g: int, b: int) -> str:
+    return f"{set_rgb(r, g, b)}{s}{reset_rgb}"
+
+
+def format_rgb_tuple(r: int, g: int, b: int) -> str:
+    return f"({r:>3}, {g:>3}, {b:>3})"
+
+
 def print_palette(palette: array):
     tiles_per_line = math.ceil(math.sqrt(len(palette)))
 
@@ -99,9 +108,50 @@ def print_palette(palette: array):
         for _ in range(tiles_per_line):
             rgb565 = palette[idx]
             r, g, b = unpack_rgb565(rgb565)
-            print(f"{set_rgb(r, g, b)}{rgb565:04X}{reset_rgb} ", end="")
+            print(with_rgb(f"{rgb565:04X}", r, g, b), end=" ")
             idx += 1
         print()
+
+
+def zero_pad(L: list, length: int) -> list:
+    if len(L) < length:
+        L.extend(0 for _ in range(length - len(L)))
+    return L
+
+
+def extract_palette(filename, preview=False):
+    im = Image.open(filename)
+    if im.mode != "P":
+        im = im.convert("P", palette=Image.Palette.ADAPTIVE)
+    srcpal = im.getpalette()
+    assert srcpal is not None
+    pal888 = list(itertools.batched(srcpal, 3))
+    pal565 = []
+    remap = []
+    final_pal888 = []
+    for rgb888 in pal888:
+        rgb565 = pack_rgb565(*rgb888)
+        preview565 = unpack_rgb565(rgb565)
+
+        dupe = " (duplicate)"
+        if rgb565 not in pal565:
+            pal565.append(rgb565)
+            final_pal888.extend(preview565)
+            dupe = ""
+        remap.append(pal565.index(rgb565))
+        if preview:
+            print(
+                f"{with_rgb(format_rgb_tuple(*rgb888), *rgb888)} -> {with_rgb(format_rgb_tuple(*preview565), *preview565)}{dupe}"
+            )
+
+    zero_pad(final_pal888, 3 * 256)
+    zero_pad(pal565, 256)
+
+    # im.putpalette(final_pal888)
+    # print(remap)
+    # im = im.remap_palette(remap)
+    # im.save("d8-" + filename)
+    return array("H", pal565)
 
 
 if __name__ == "__main__":
