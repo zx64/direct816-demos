@@ -112,3 +112,11 @@ if __name__ == "__main__":
     for i in range(256):
         tmp[i] = blend_rgb565(0, 0xFFFF, i / 255.0)
     print_palette(tmp)
+
+    with open("../firmware/assets/palettes/gradients/viridis.bin", "rb") as f:
+        f.readinto(tmp)
+    print_palette(tmp)
+
+    with open("../firmware/assets/palettes/vga.bin", "rb") as f:
+        f.readinto(tmp)
+    print_palette(tmp)
