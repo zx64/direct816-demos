@@ -94,6 +94,9 @@ def with_rgb(s: str, r: int, g: int, b: int) -> str:
 def format_rgb_tuple(r: int, g: int, b: int) -> str:
     return f"({r:>3}, {g:>3}, {b:>3})"
 
+def show_rgb(r: int, g: int, b: int) -> str:
+    return with_rgb(format_rgb_tuple(r, g, b), r, g, b)
+
 
 def print_palette(palette: array):
     tiles_per_line = math.ceil(math.sqrt(len(palette)))
@@ -141,7 +144,7 @@ def extract_palette(filename, preview=False):
         remap.append(pal565.index(rgb565))
         if preview:
             print(
-                f"{with_rgb(format_rgb_tuple(*rgb888), *rgb888)} -> {with_rgb(format_rgb_tuple(*preview565), *preview565)}{dupe}"
+                f"{show_rgb(*rgb888)} -> {show_rgb(*preview565)}{dupe}"
             )
 
     zero_pad(final_pal888, 3 * 256)
