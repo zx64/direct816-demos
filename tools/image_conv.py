@@ -51,9 +51,11 @@ def convert_image_d16(filename: str) -> array:
     result[0] = w
     result[1] = h
     idx = 2
+    pixels = im.load()
+    assert pixels is not None
     for x in range(w):
         for y in range(h):
-            pixel = im.getpixel((x, y))
+            pixel = pixels[x, y]
             assert isinstance(pixel, tuple)
             result[idx] = pack_rgb565(*pixel)
             idx += 1
