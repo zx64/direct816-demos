@@ -172,6 +172,9 @@ the PIO code accomplished the desired outcome.
     - In progress on another branch, but inital results seem close to doing this work on
       the CPU and thus a less exciting prospect than when I first got it working on the
       original Tufty2040.
+- 320x200 version of prepare that repeats every 5th line to stretch it to 320x240
+    - This is for porting DOS code that was written using VGA Mode 13h or Mode Y and
+      expects slightly rectangular pixels.
 
 ## For this repository and the demos:
 - CI doesn't mark a commit as bad even if the interior build task fails
