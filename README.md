@@ -224,6 +224,14 @@ Linus Akesson's post about his RP2350 demo from 2025 [Kaleidoscopico](https://ww
 
 He has also made [an in-depth video](https://www.youtube.com/watch?v=0_9YS2tsdYc) about his 2026 RP2350 demo [Sum Ergo Demonstro](https://linusakesson.net/scene/sum-ergo-demonstro/index.php).
 
+In both cases, he used PIO's output priority feature to implement multiple layers. Would
+be fun to experiment with but in this general purpose project I can't help myself to all
+the resources.
+
+While I had independently figured out how to darken an RGB565 colour without unpacking
+(good enough to cheaply create a transluscent overlay to provide better contrast for any
+text), I had missed a clever insight to [decompose the definition of binary addition into
+its xor and bitwise and terms to implemenent averaging](https://medium.com/@luc.trudeau/fast-averaging-of-high-color-16-bit-pixels-cb4ac7fd1488).
 
 # Thoughts on how to refactor the demo code into a better app
 Effects get refactored into something like
