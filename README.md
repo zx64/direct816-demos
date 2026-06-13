@@ -233,6 +233,15 @@ While I had independently figured out how to darken an RGB565 colour without unp
 text), I had missed a clever insight to [decompose the definition of binary addition into
 its xor and bitwise and terms to implemenent averaging](https://medium.com/@luc.trudeau/fast-averaging-of-high-color-16-bit-pixels-cb4ac7fd1488).
 
+A bit more searching has yielded some other interesting ideas about how you might
+implement [alpha blending in RGB565](https://github.com/libsdl-org/SDL/blob/main/src/video/SDL_RLEaccel.c#L136)
+
+Here, a clever trick I hadn't thought of is to initially expand the RGB565 value into
+a uint32 to add more bits per channel, which avoids high bits being carried into another
+channel when you multiply or add. It only supports five bits of alpha but better than no
+alpha!
+
+
 # Thoughts on how to refactor the demo code into a better app
 Effects get refactored into something like
 ```python
