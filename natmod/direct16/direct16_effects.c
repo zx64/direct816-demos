@@ -1,8 +1,23 @@
 #include "py/dynruntime.h"
+#include "pv_rect.h"
 
 #define FRAMEWIDTH 240
 #define FRAMEHEIGHT 320
 #define HALFHEIGHT (FRAMEHEIGHT/2)
+
+
+//#define TEST_RECT  // Requries LINK_RUNTIME
+#if defined(TEST_RECT)
+static mp_obj_t test_rect(mp_obj_t rect_obj)
+{
+    pv_rect r = get_rect(rect_obj);
+    const float area = r.w * r.h;
+    mp_printf(MP_PYTHON_PRINTER, "r: %.2f, %.2f [%.2f x %.2f] area: %.2f\n", r.x, r.y, r.w, r.h, area);
+    return mp_obj_new_float(area);
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(test_rect_obj, test_rect);
+#endif
+
 
 uint16_t* palette = NULL;
 mp_obj_t* display_obj = NULL;
@@ -310,6 +325,12 @@ mp_obj_t mpy_init(mp_obj_fun_bc_t *self, size_t n_args, size_t n_kw, mp_obj_t *a
 
     seed[0] = 0x7273E7B6; // just four bytes from /dev/random
     seed[1] = 0xEC0F8626; // just four bytes from /dev/random
+
+    init_rect_type();
+#if defined(TEST_RECT)
+    mp_store_global(MP_QSTR_test_rect, MP_OBJ_FROM_PTR(&test_rect_obj));
+#endif
+
     mp_store_global(MP_QSTR_set_display, MP_OBJ_FROM_PTR(&set_display_obj));
     mp_store_global(MP_QSTR_set_palette, MP_OBJ_FROM_PTR(&set_palette_obj));
     mp_store_global(MP_QSTR_set_scroll_arrays, MP_OBJ_FROM_PTR(&set_scroll_arrays_obj));
@@ -318,6 +339,7 @@ mp_obj_t mpy_init(mp_obj_fun_bc_t *self, size_t n_args, size_t n_kw, mp_obj_t *a
     mp_store_global(MP_QSTR_xor_scroll, MP_OBJ_FROM_PTR(&xor_scroll_obj));
     mp_store_global(MP_QSTR_plasma_scroll, MP_OBJ_FROM_PTR(&plasma_scroll_obj));
     mp_store_global(MP_QSTR_random_noise, MP_OBJ_FROM_PTR(&random_noise_obj));
+
 
     MP_DYNRUNTIME_INIT_EXIT
 }
