@@ -1,4 +1,5 @@
 #include "py/dynruntime.h"
+#include "pv_rect.h"
 
 #define FRAMEWIDTH 240
 #define FRAMEHEIGHT 320
@@ -358,6 +359,8 @@ static MP_DEFINE_CONST_FUN_OBJ_1(overlay_obj, overlay);
 mp_obj_t mpy_init(mp_obj_fun_bc_t *self, size_t n_args, size_t n_kw, mp_obj_t *args)
 {
     MP_DYNRUNTIME_INIT_ENTRY
+
+    init_rect_type();
 
     seed[0] = 0x7273E7B6; // just four bytes from /dev/random
     seed[1] = 0xEC0F8626; // just four bytes from /dev/random
