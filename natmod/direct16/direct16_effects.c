@@ -6,7 +6,7 @@
 #define HALFHEIGHT (FRAMEHEIGHT/2)
 
 
-//#define TEST_RECT  // Requries LINK_RUNTIME
+#define TEST_RECT  // Requries LINK_RUNTIME
 #if defined(TEST_RECT)
 static mp_obj_t test_rect(mp_obj_t rect_obj)
 {
