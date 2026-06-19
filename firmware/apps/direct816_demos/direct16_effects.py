@@ -3,11 +3,11 @@ import math
 import micropython
 from array import array
 from common_effects import (
-    convert_palette,
     x_scroll,
     y_scroll,
 )
 from common_effects import orange_cycle as palette
+from direct816 import convert_palette, convert_pv_image16, blit_pv_image16
 
 WIDTH = const(240)
 HEIGHT = const(320)
@@ -230,75 +230,10 @@ pv_red = pv_circle(64, color.red)
 pv_green = pv_circle(32, color.green)
 pv_blue = pv_circle(16, color.blue)
 
-from common_effects import convert_pv_image16
-
-
 cvt_text = convert_pv_image16(pv_text)
 cvt_red = convert_pv_image16(pv_red)
 cvt_green = convert_pv_image16(pv_green)
 cvt_blue = convert_pv_image16(pv_blue)
-
-
-@micropython.viper
-def blit_pv_image16(img, x: int, y: int, masked: bool, darken: bool):
-    if x >= WIDTH:
-        return
-    if y >= HEIGHT:
-        return
-
-    iwidth = int(img[2])
-    stride = uint(iwidth)
-    x_skip = uint(0)
-    if x < 0:
-        iwidth += x
-        x_skip = uint(-x)
-        if iwidth <= 0:
-            return
-        x = 0
-    if x + iwidth > WIDTH:
-        iwidth = WIDTH - x
-
-    iheight = int(img[3])
-    y_skip = uint(0)
-    if y < 0:
-        iheight += y
-        y_skip = uint(-y)
-        if iheight <= 0:
-            return
-        y = 0
-    if y + iheight > HEIGHT:
-        iheight = HEIGHT - y
-
-    origin = x + WIDTH * y
-
-    src = ptr16(uint(ptr16(img[0])) + (x_skip + y_skip * stride) * BYTES_PER_PIXEL)
-    mask = ptr8(uint(ptr8(img[1])) + (x_skip + y_skip * stride))
-    dst = ptr16(uint(ptr16(display)) + origin * BYTES_PER_PIXEL)
-
-    if masked:
-        if darken:
-            for py in range(iheight):
-                for px in range(iwidth):
-                    srcpos = px + py * stride
-                    dstpos = px + py * WIDTH
-                    if mask[srcpos]:
-                        dst[dstpos] = src[srcpos]
-                    else:
-                        dst[dstpos] >>= 1
-                        dst[dstpos] &= 0b01111_011111_01111
-        else:
-            for py in range(iheight):
-                for px in range(iwidth):
-                    srcpos = px + py * stride
-                    dstpos = px + py * WIDTH
-                    if mask[srcpos]:
-                        dst[dstpos] = src[srcpos]
-    else:
-        for py in range(iheight):
-            for px in range(iwidth):
-                srcpos = px + py * stride
-                dstpos = px + py * WIDTH
-                dst[dstpos] = src[srcpos]
 
 
 @micropython.viper
