@@ -1,10 +1,10 @@
 #include "py/dynruntime.h"
 #include "pv_rect.h"
+#include "effects.h"
 
 #define FRAMEWIDTH 240
 #define FRAMEHEIGHT 320
 #define HALFHEIGHT (FRAMEHEIGHT/2)
-
 
 #define TEST_RECT  // Requries LINK_RUNTIME
 #if defined(TEST_RECT)
