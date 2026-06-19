@@ -1,5 +1,5 @@
 import micropython
-from common_effects import load_palette
+from direct816 import load_palette
 
 try:
     from _direct8_effects import xor_scroll
