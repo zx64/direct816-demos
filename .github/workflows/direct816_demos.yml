@@ -99,10 +99,6 @@ jobs:
         path: ${{ env.CI_BUILD_ROOT }}/${{ env.CI_RELEASE_FILENAME }}.zip
         archive: false
 
-
-    - name: "ls build root"
-      run: ls -lart ${{ env.CI_BUILD_ROOT }}
-
     - name: "Release: Upload direct816_demos.zip"
       if: github.event_name == 'release'
       uses: softprops/action-gh-release@v3
