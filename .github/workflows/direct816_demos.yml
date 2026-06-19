@@ -102,4 +102,4 @@ jobs:
       uses: softprops/action-gh-release@v3
       with:
         working_directory: ${{ env.CI_BUILD_ROOT }}
-        files: ${{ env.CI_RELEASE_FILENAME }}
+        files: ${{ env.CI_RELEASE_FILENAME }}.zip
