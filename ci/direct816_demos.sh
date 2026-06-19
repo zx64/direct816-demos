@@ -28,7 +28,7 @@ function ci_micropython_build_mpy_cross {
 }
 
 function ci_apt_install_build_deps {
-    sudo apt update && sudo apt install ccache
+    sudo apt update && sudo apt install ccache zip
 }
 
 function ci_install_build_deps {
@@ -51,12 +51,20 @@ function ci_build {
     CROSS_COMPILE="ccache" MPY_DIR="$CI_BUILD_ROOT/micropython" make -C "$CI_PROJECT_ROOT/natmod" || return 1
     ccache --show-stats || true
 
+
+    if [ -z ${CI_RELEASE_FILENAME+x} ]; then
+        CI_RELEASE_FILENAME=direct816_demos-unknown.zip
+    fi
+
     # Make a copy of the firmware directory in the build directory, copy in native modules
+    # and compress with zip for uploading.
     rm -fr "$CI_BUILD_ROOT/direct816_demos"
     mkdir "$CI_BUILD_ROOT/direct816_demos" || return 1
     cp -a -t "$CI_BUILD_ROOT/direct816_demos" "$CI_PROJECT_ROOT/firmware/"* || return 1
     cp -v "$CI_PROJECT_ROOT/natmod/"*/_*.mpy "$CI_BUILD_ROOT" || return 1
     mv -v "$CI_PROJECT_ROOT/natmod/"*/_*.mpy "$CI_BUILD_ROOT/direct816_demos/apps/direct816_demos" || return 1
+
+    zip -9r "$CI_RELEASE_FILENAME.zip" direct816_demos/ || return 1
 }
 
 if [ -z ${CI_USE_ENV+x} ] || [ -z ${CI_PROJECT_ROOT+x} ] || [ -z ${CI_BUILD_ROOT+x} ]; then

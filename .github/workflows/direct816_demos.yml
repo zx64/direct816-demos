@@ -90,12 +90,15 @@ jobs:
         path: |
           ${{ env.CI_BUILD_ROOT }}/_direct8_effects.mpy
           ${{ env.CI_BUILD_ROOT }}/_direct16_effects.mpy
+        compression-level: 9
 
     - name: "Artifacts: Upload direct816_demos.zip"
       uses: actions/upload-artifact@v7
       with:
         name: ${{ env.CI_RELEASE_FILENAME }}.zip
-        path: ${{ env.CI_BUILD_ROOT }}/direct816_demos
+        path: ${{ env.CI_BUILD_ROOT }}/${{ env.CI_RELEASE_FILENAME }}.zip
+        archive: false
+
 
     - name: "ls build root"
       run: ls -lart ${{ env.CI_BUILD_ROOT }}
