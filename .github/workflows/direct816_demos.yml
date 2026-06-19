@@ -17,7 +17,7 @@ jobs:
         - name: direct816_demos
 
     env:
-      CI_RELEASE_FILENAME: ${{ matrix.name }}-${{ github.event.release.tag_name || github.sha }}.zip
+      CI_RELEASE_FILENAME: ${{ matrix.name }}-${{ github.event.release.tag_name || github.sha }}
       CI_PROJECT_ROOT: ${{ github.workspace }}/src-${{ github.sha }}
       CI_BUILD_ROOT: ${{ github.workspace }}
       CI_USE_ENV: 1
@@ -83,10 +83,10 @@ jobs:
         source $CI_PROJECT_ROOT/ci/direct816_demos.sh
         ci_build
 
-    - name: "Artifacts: Upload native modules"
+    - name: "Artifacts: Upload natmods.zip"
       uses: actions/upload-artifact@v7
       with:
-        name: natmod
+        name: ${{ env.CI_RELEASE_FILENAME }}_natmods.zip
         path: |
           ${{ env.CI_BUILD_ROOT }}/_direct8_effects.mpy
           ${{ env.CI_BUILD_ROOT }}/_direct16_effects.mpy
@@ -94,7 +94,7 @@ jobs:
     - name: "Artifacts: Upload direct816_demos.zip"
       uses: actions/upload-artifact@v7
       with:
-        name: ${{ env.CI_RELEASE_FILENAME }}
+        name: ${{ env.CI_RELEASE_FILENAME }}.zip
         path: ${{ env.CI_BUILD_ROOT }}/direct816_demos
 
     - name: "Release: Upload direct816_demos.zip"
