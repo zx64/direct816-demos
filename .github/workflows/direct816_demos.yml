@@ -17,7 +17,7 @@ jobs:
         - name: direct816_demos
 
     env:
-      CI_RELEASE_FILENAME: ${{ matrix.name }}_demos-${{ github.event.release.tag_name || github.sha }}.zip
+      CI_RELEASE_FILENAME: ${{ matrix.name }}-${{ github.event.release.tag_name || github.sha }}.zip
       CI_PROJECT_ROOT: ${{ github.workspace }}/src-${{ github.sha }}
       CI_BUILD_ROOT: ${{ github.workspace }}
       CI_USE_ENV: 1
@@ -83,26 +83,22 @@ jobs:
         source $CI_PROJECT_ROOT/ci/direct816_demos.sh
         ci_build
 
-    - name: "Artifacts: Upload _direct8_effects.mpy"
-      uses: actions/upload-artifact@v4
+    - name: "Artifacts: Upload native modules"
+      uses: actions/upload-artifact@v7
       with:
-        name: _direct8_effects.mpy
-        path: ${{ env.CI_BUILD_ROOT }}/_direct8_effects.mpy
-
-    - name: "Artifacts: Upload _direct16_effects.mpy"
-      uses: actions/upload-artifact@v4
-      with:
-        name: _direct16_effects.mpy
-        path: ${{ env.CI_BUILD_ROOT }}/_direct16_effects.mpy
+        name: natmod
+        path: |
+          ${{ env.CI_BUILD_ROOT }}/_direct8_effects.mpy
+          ${{ env.CI_BUILD_ROOT }}/_direct16_effects.mpy
 
     - name: "Artifacts: Upload direct816_demos.zip"
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ env.CI_RELEASE_FILENAME }}
-        path: ${{ env.CI_BUILD_ROOT }}/${{ env.CI_RELEASE_FILENAME }}
+        path: ${{ env.CI_BUILD_ROOT }}/direct816_demos
 
     - name: "Release: Upload direct816_demos.zip"
       if: github.event_name == 'release'
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
-        files: ${{ env.CI_BUILD_ROOT }}/${{ env.CI_RELEASE_FILENAME }}
+        files: ${{ env.CI_BUILD_ROOT }}/direct816_demos
