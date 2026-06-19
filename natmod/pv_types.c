@@ -1,5 +1,5 @@
 #include "py/dynruntime.h"
-#include "pv_rect.h"
+#include "pv_types.h"
 
 const mp_obj_type_t* type_rect = NULL;
 

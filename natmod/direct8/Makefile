@@ -2,7 +2,7 @@ MPY_DIR ?= ../micropython
 
 MOD = _direct8_effects
 
-SRC = direct8_effects.c pv_rect.c effects.c
+SRC = direct8_effects.c pv_types.c effects.c
 
 ARCH = armv7m
 

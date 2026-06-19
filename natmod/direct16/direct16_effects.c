@@ -1,5 +1,5 @@
 #include "py/dynruntime.h"
-#include "pv_rect.h"
+#include "pv_types.h"
 #include "effects.h"
 
 #define FRAMEWIDTH 240
