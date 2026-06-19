@@ -101,4 +101,5 @@ jobs:
       if: github.event_name == 'release'
       uses: softprops/action-gh-release@v3
       with:
-        files: ${{ env.CI_BUILD_ROOT }}/direct816_demos
+        working_directory: ${{ env.CI_BUILD_ROOT }}
+        files: direct816_demos
