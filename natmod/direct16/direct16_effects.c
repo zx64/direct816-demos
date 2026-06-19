@@ -326,7 +326,7 @@ mp_obj_t mpy_init(mp_obj_fun_bc_t *self, size_t n_args, size_t n_kw, mp_obj_t *a
     seed[0] = 0x7273E7B6; // just four bytes from /dev/random
     seed[1] = 0xEC0F8626; // just four bytes from /dev/random
 
-    init_rect_type();
+    init_pv_types();
 #if defined(TEST_RECT)
     mp_store_global(MP_QSTR_test_rect, MP_OBJ_FROM_PTR(&test_rect_obj));
 #endif
