@@ -17,7 +17,7 @@ jobs:
         - name: direct816_demos
 
     env:
-      CI_RELEASE_FILENAME: ${{ matrix.name }}-${{ github.event.release.tag_name || github.sha }}-direct816
+      CI_RELEASE_FILENAME: ${{ matrix.name }}_demos-${{ github.event.release.tag_name || github.sha }}.zip
       CI_PROJECT_ROOT: ${{ github.workspace }}/src-${{ github.sha }}
       CI_BUILD_ROOT: ${{ github.workspace }}
       CI_USE_ENV: 1
@@ -98,23 +98,11 @@ jobs:
     - name: "Artifacts: Upload direct816_demos.zip"
       uses: actions/upload-artifact@v4
       with:
-        name: direct816_demos.zip
-        path: ${{ env.CI_BUILD_ROOT }}/direct816_demos.zip
-
-    - name: "Release: Upload _direct8_effects.mpy"
-      if: github.event_name == 'release'
-      uses: softprops/action-gh-release@v2
-      with:
-        files: ${{ env.CI_BUILD_ROOT }}/_direct8_effects.mpy
-
-    - name: "Release: Upload _direct16_effects.mpy"
-      if: github.event_name == 'release'
-      uses: softprops/action-gh-release@v2
-      with:
-        files: ${{ env.CI_BUILD_ROOT }}/_direct16_effects.mpy
+        name: ${{ env.CI_RELEASE_FILENAME }}
+        path: ${{ env.CI_BUILD_ROOT }}/${{ env.CI_RELEASE_FILENAME }}
 
     - name: "Release: Upload direct816_demos.zip"
       if: github.event_name == 'release'
       uses: softprops/action-gh-release@v2
       with:
-        files: ${{ env.CI_BUILD_ROOT }}/direct816_demos.zip"
+        files: ${{ env.CI_BUILD_ROOT }}/${{ env.CI_RELEASE_FILENAME }}

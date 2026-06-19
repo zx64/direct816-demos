@@ -50,6 +50,13 @@ function ci_build {
     ccache --zero-stats || true
     CROSS_COMPILE="ccache" MPY_DIR="$CI_BUILD_ROOT/micropython" make -C "$CI_PROJECT_ROOT/natmod" || return 1
     ccache --show-stats || true
+
+    if [ -z ${CI_RELEASE_FILENAME+x} ]; then
+        CI_RELEASE_FILENAME=direct816_demos-unknown.zip
+    fi
+
+    # Make a copy of the firmware directory in the build directory, copy in native modules
+    # and zip to upload as a downloadable result.
     rm -fr "$CI_BUILD_ROOT/direct816_demos"
     mkdir "$CI_BUILD_ROOT/direct816_demos" || return 1
     cp -a -t "$CI_BUILD_ROOT/direct816_demos" "$CI_PROJECT_ROOT/firmware/"* || return 1
@@ -58,6 +65,7 @@ function ci_build {
     cd "$CI_BUILD_ROOT" || return 1
     rm -f direct816_demos.zip
     zip -9r direct816_demos.zip direct816_demos/ || return 1
+    mv direct816_demos.zip "$CI_RELEASE_FILENAME"
 }
 
 if [ -z ${CI_USE_ENV+x} ] || [ -z ${CI_PROJECT_ROOT+x} ] || [ -z ${CI_BUILD_ROOT+x} ]; then
