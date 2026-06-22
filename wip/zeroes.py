@@ -28,6 +28,12 @@ def benchmark(f):
 
 
 @benchmark
+def test_bytearray_only(n):
+    """Test only allocating the bytearray, assumes you'll use ptr16 later"""
+    return bytearray(n * 2)
+
+
+@benchmark
 def test_range_nonzero(n):
     """Use a native range (doesn't zero init)"""
     return array.array("H", range(n))
@@ -89,4 +95,3 @@ for _, func in sorted(
     (name, func) for (name, func) in globals().items() if name.startswith("test_")
 ):
     arr = func(fbsize)
-    assert len(arr) == fbsize
