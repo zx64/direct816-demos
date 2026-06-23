@@ -27,8 +27,6 @@ __all__ = [
     "managua",
     "plasma",
     "scaled_lookup",
-    "sunlight",
-    "sunlight_full",
     "twilight",
     "twilight_full",
     "vanimo",
@@ -1338,8 +1336,6 @@ plasma: Colourmap = [
     (0.940015, 0.975158, 0.131326),
 ]
 
-# sunlight_full is a rotation of twilight_full
-
 twilight_full: Colourmap = [
     (0.88575015840754434, 0.85000924943067835, 0.8879736506427196),
     (0.88378520195539056, 0.85072940540310626, 0.88723222096949894),
@@ -2371,18 +2367,9 @@ viridis: Colourmap = [
     (0.993248, 0.906157, 0.143936),
 ]
 
-# Sunlight is defined as a rotated version of twilight
-sunlight_full: Colourmap = list(
-    reversed(
-        twilight_full[len(twilight_full) // 2 :]
-        + twilight_full[: len(twilight_full) // 2]
-    )
-)
-
 # Downsample the full ranges to fit in 256 entries
 assert len(twilight_full) > 256
 twilight: Colourmap = [scaled_lookup(twilight_full, i / 255.0) for i in range(256)]
-sunlight: Colourmap = [scaled_lookup(sunlight_full, i / 255.0) for i in range(256)]
 
 
 all_colourmaps: dict[str, Colourmap] = {
@@ -2391,8 +2378,6 @@ all_colourmaps: dict[str, Colourmap] = {
     "magma": magma,
     "managua": managua,
     "plasma": plasma,
-    "sunlight": sunlight,
-    "sunlight_full": sunlight_full,
     "twilight": twilight,
     "twilight_full": twilight_full,
     "vanimo": vanimo,
