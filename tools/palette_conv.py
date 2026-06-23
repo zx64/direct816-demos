@@ -3,11 +3,10 @@
 import math
 import itertools
 from array import array
+from pathlib import Path
 from PIL import Image, ImageDraw
 
 # TODO:
-# Extract my palette conversion code from other projects
-#
 # Generate Doom-era palette-to-palette lookups for things like brightness adjusting,
 # applying tints, full screen effects or finding the best match for 50% transluscency
 # between two colours
@@ -156,18 +155,16 @@ def extract_palette(filename, preview=False):
     return array("H", pal565)
 
 
+def show_palettes():
+    root = Path("../firmware/assets/palettes")
+    tmp = array("H", bytearray(512))
+    for subroot in (Path("."), Path("gradients")):
+        for palette_name in (root / subroot).glob("*.bin"):
+            with palette_name.open("rb") as f:
+                f.readinto(tmp)
+            print(palette_name.stem)
+            print_palette(tmp)
+
+
 if __name__ == "__main__":
-    greys = array("H", [pack_rgb565(i, i, i) for i in range(256)])
-    print_palette(greys)
-    tmp = array("H", [0] * 256)
-    for i in range(256):
-        tmp[i] = blend_rgb565(0, 0xFFFF, i / 255.0)
-    print_palette(tmp)
-
-    with open("../firmware/assets/palettes/gradients/viridis.bin", "rb") as f:
-        f.readinto(tmp)
-    print_palette(tmp)
-
-    with open("../firmware/assets/palettes/vga.bin", "rb") as f:
-        f.readinto(tmp)
-    print_palette(tmp)
+    show_palettes()
