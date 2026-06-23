@@ -1,6 +1,8 @@
+from typehints import RGB_U8
+
 # fmt: off
 # Generated from https://github.com/canidlogic/vgapal
-vga: list[tuple[int, int, int]] = [
+vga: list[RGB_U8] = [
     (  0,   0,   0), (  0,   0, 170), (  0, 170,   0), (  0, 170, 170),
     (170,   0,   0), (170,   0, 170), (170,  85,   0), (170, 170, 170),
     ( 85,  85,  85), ( 85,  85, 255), ( 85, 255,  85), ( 85, 255, 255),

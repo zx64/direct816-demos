@@ -1,30 +1,8 @@
 #!/usr/bin/env python
 from array import array
 from colourmaps import all_colourmaps
-from typing import TYPE_CHECKING
 from vgapal import vga
-
-if TYPE_CHECKING:
-    from ty_extensions import JustFloat
-
-else:
-    JustFloat = float
-
-RGB_F32 = tuple[JustFloat, JustFloat, JustFloat]
-
-if TYPE_CHECKING:
-    from colorsys import hsv_to_rgb
-
-    def hsv(h: float, s: float, v: float) -> RGB_F32:
-        r, g, b = hsv_to_rgb(h, s, v)
-        assert isinstance(r, float)
-        assert isinstance(g, float)
-        assert isinstance(b, float)
-        return r, g, b
-else:
-    from colorsys import hsv_to_rgb as hsv
-
-RGB_U8 = tuple[int, int, int]
+from typehints import hsv, JustFloat, RGB_F32, RGB_U8
 
 
 def rescale_rgb888(r: JustFloat, g: JustFloat, b: JustFloat) -> RGB_U8:

@@ -15,14 +15,8 @@
 # You should have received a copy of the CC0 legalcode along with this
 # work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-from typing import TYPE_CHECKING
+from typehints import RGB_F32
 
-if TYPE_CHECKING:
-    from ty_extensions import JustFloat
-else:
-    JustFloat = float
-
-RGB_F32 = tuple[JustFloat, JustFloat, JustFloat]
 Colourmap = list[RGB_F32]
 
 __all__ = [
