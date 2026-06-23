@@ -3,7 +3,7 @@ SCRIPT_PATH=$(dirname "$SCRIPT_PATH")
 SCRIPT_PATH=$(realpath "$SCRIPT_PATH")
 
 function qa_prepare_all {
-    pip install ruff
+    pip install ruff ty
 }
 
 function qa_check {
@@ -36,4 +36,9 @@ function qa_modules_check {
 
 function qa_modules_fix {
     qa_fix modules/
+}
+
+function qa_tools_check {
+    ruff check tools/
+    ty check tools/
 }
