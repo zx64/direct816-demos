@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from array import array
-from colourmaps import all_colourmaps
+from matplotlib_colourmaps import all_colourmaps
 from vgapal import vga
 from typehints import hsv, JustFloat, RGB_F32, RGB_U8
 
