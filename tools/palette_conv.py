@@ -94,6 +94,7 @@ def with_rgb(s: str, r: int, g: int, b: int) -> str:
 def format_rgb_tuple(r: int, g: int, b: int) -> str:
     return f"({r:>3}, {g:>3}, {b:>3})"
 
+
 def show_rgb(r: int, g: int, b: int) -> str:
     return with_rgb(format_rgb_tuple(r, g, b), r, g, b)
 
@@ -143,9 +144,7 @@ def extract_palette(filename, preview=False):
             dupe = ""
         remap.append(pal565.index(rgb565))
         if preview:
-            print(
-                f"{show_rgb(*rgb888)} -> {show_rgb(*preview565)}{dupe}"
-            )
+            print(f"{show_rgb(*rgb888)} -> {show_rgb(*preview565)}{dupe}")
 
     zero_pad(final_pal888, 3 * 256)
     zero_pad(pal565, 256)
