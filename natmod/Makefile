@@ -9,3 +9,7 @@ clean:
 	$(MAKE) -C direct16 clean
 	$(MAKE) -C direct8 clean
 	$(MAKE) -C demo_effects clean
+
+.PHONY: deploy
+deploy:
+	mpremote cp */*.mpy :/lib
