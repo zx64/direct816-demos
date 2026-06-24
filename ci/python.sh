@@ -3,7 +3,7 @@ SCRIPT_PATH=$(dirname "$SCRIPT_PATH")
 SCRIPT_PATH=$(realpath "$SCRIPT_PATH")
 
 function qa_prepare_all {
-    pip install ruff ty
+    pip install ruff ty pillow==12.2.0
 }
 
 function qa_check {
