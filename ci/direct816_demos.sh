@@ -62,7 +62,7 @@ function ci_build {
     mkdir "$CI_BUILD_ROOT/direct816_demos" || return 1
     cp -a -t "$CI_BUILD_ROOT/direct816_demos" "$CI_PROJECT_ROOT/firmware/"* || return 1
     cp -v "$CI_PROJECT_ROOT/natmod/"*/_*.mpy "$CI_BUILD_ROOT" || return 1
-    mv -v "$CI_PROJECT_ROOT/natmod/"*/_*.mpy "$CI_BUILD_ROOT/direct816_demos/apps/direct816_demos" || return 1
+    mv -v "$CI_PROJECT_ROOT/natmod/"*/direct*.mpy "$CI_BUILD_ROOT/direct816_demos/apps/direct816_demos" || return 1
 
     zip -9r "$CI_RELEASE_FILENAME.zip" direct816_demos/ || return 1
 }
