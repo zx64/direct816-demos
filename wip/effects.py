@@ -1,4 +1,5 @@
-from time import ticks_us
+import _thread
+from time import sleep, ticks_us
 
 SCREEN_WIDTH = const(240)
 SCREEN_HEIGHT = const(320)
@@ -45,8 +46,43 @@ class Layer:
         self.dests[1] = dest.intersection(core_bounds[1])
 
 
-class EffectManager:
+class MTWorker:
     def __init__(self):
+        self.lock = _thread.allocate_lock()
+        self.running = True
+        self.queue = []
+
+        def worker(self):
+            from time import sleep
+
+            while True:
+                with self.lock:
+                    if not self.running:
+                        return
+                    if not self.queue:
+                        sleep(0)
+                        continue
+                    func, args = self.queue.pop()
+                func(*args)
+
+        _thread.start_new_thread(worker, (self,))
+
+    def empty(self):
+        with self.lock:
+            return not self.queue
+
+    def call(self, func, *args):
+        with self.lock:
+            self.queue.append((func, args))
+
+    def stop(self):
+        with self.lock:
+            self.running = False
+
+
+class EffectManager:
+    def __init__(self, mt):
+        self.mt = mt
         self.foreground_effects = {}
         self.background_effects = {}
         self.invalid_menu_text = True
@@ -65,14 +101,20 @@ class EffectManager:
             if not layer:
                 continue
             layer.effect.handle_input(self.ticks, dT)
+            self.mt.call(layer.effect.update, self.ticks, dT, True)
             layer.effect.update(self.ticks, dT, False)
-            layer.effect.update(self.ticks, dT, True)
+
+        while not self.mt.empty():
+            sleep(0)
 
         for layer in self.layers:
             if not layer:
                 continue
+            self.mt.call(layer.draw, True)
             layer.draw(False)
-            layer.draw(True)
+
+        while not self.mt.empty():
+            sleep(0)
 
         self.ticks += 1
 
@@ -101,34 +143,71 @@ class EffectManager:
         print("Background effects: ", end="")
         print(",".join(sorted(k for k in self.background_effects.keys())))
 
+    def dbg(self):
+        for layer in self.layers:
+            if not layer:
+                continue
+            layer.effect.print_msgs()
+
+
+start = ticks_us()
+
 
 class DummyEffect(Effect):
     def __init__(self, v):
         self.v = v
+        self.last_update = [0, 0]
+        self.last_draw = [0, 0]
+        self.update_msgs = ["", ""]
+        self.draw_msgs = ["", ""]
 
     def update(self, tick: int, dT: float, core1: bool):
-        print(f"[{self.v}] {core1=} Updating {tick=} {dT=:.2f}")
+        self.last_update[core1] = ticks_us() - start
+        self.update_msgs[core1] = (
+            f"[{ticks_us() - start}][{self.v}] {core1=} Updating {tick=} {dT=:.2f}"
+        )
 
     def draw(self, scroll: vec2, dest: rect, core1: bool):
-        print(f"[{self.v}] {core1=} Drawing to {dest} with scroll offset {scroll}")
+        self.last_draw[core1] = ticks_us() - start
+        self.draw_msgs[core1] = (
+            f"[{ticks_us() - start}][{self.v}] {core1=} Drawing to {dest} with scroll offset {scroll}"
+        )
+
+    def print_msgs(self):
+        assert all(all(u < d for u in self.last_update) for d in self.last_draw)
+        print("Update messages:")
+        print(self.update_msgs[0])
+        print(self.update_msgs[1])
+        print("Draw messages:")
+        print(self.draw_msgs[0])
+        print(self.draw_msgs[1])
 
 
-em = EffectManager()
+mt = MTWorker()
+em = EffectManager(mt)
 em.update()
+em.dbg()
 print(".")
-em.register_background_effect("Dummy BG", DummyEffect(0))
+em.register_background_effect("Dummy BG", DummyEffect("BG"))
 em.update()
+em.dbg()
 print(".")
-em.register_foreground_effect("Dummy FG", DummyEffect(1))
+em.register_foreground_effect("Dummy FG", DummyEffect("FG"))
 em.update()
+em.dbg()
 print(".")
 em.set_background("Dummy BG")
 em.update()
+em.dbg()
 print(".")
 em.set_foreground("Dummy FG")
 em.update()
+em.dbg()
 print(".")
 em.update()
+em.dbg()
 print(".")
 em.update()
+em.dbg()
 print(".")
+mt.stop()
