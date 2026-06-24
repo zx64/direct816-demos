@@ -76,19 +76,23 @@ class EffectManager:
 
         self.ticks += 1
 
-    def register_foreground_effect(self, effect: Effect):
-        self.foreground_effects[effect.__class__.__name__] = effect
+    def register_foreground_effect(self, name: str, effect: Effect):
+        if name in self.foreground_effects:
+            raise RuntimeError(f"Duplicate effect name {name} for this layer")
+        self.foreground_effects[name] = effect
         self.invalid_menu_text = True
 
-    def register_background_effect(self, effect: Effect):
-        self.background_effects[effect.__class__.__name__] = effect
+    def register_background_effect(self, name: str, effect: Effect):
+        if name in self.background_effects:
+            raise RuntimeError(f"Duplicate effect name {name} for this layer")
+        self.background_effects[name] = effect
         self.invalid_menu_text = True
 
-    def set_background(self, effect_class: type):
-        self.layers[0] = Layer(self.background_effects[effect_class.__name__])
+    def set_background(self, name: str):
+        self.layers[0] = Layer(self.background_effects[name])
 
-    def set_foreground(self, effect_class: type):
-        self.layers[1] = Layer(self.foreground_effects[effect_class.__name__])
+    def set_foreground(self, name: str):
+        self.layers[1] = Layer(self.foreground_effects[name])
 
     def prepare_menus(self):
         self.invalid_menu_text = False
@@ -112,14 +116,16 @@ class DummyEffect(Effect):
 em = EffectManager()
 em.update()
 print(".")
-em.register_background_effect(DummyEffect(0))
-em.register_foreground_effect(DummyEffect(1))
+em.register_background_effect("Dummy BG", DummyEffect(0))
 em.update()
 print(".")
-em.set_background(DummyEffect)
+em.register_foreground_effect("Dummy FG", DummyEffect(1))
 em.update()
 print(".")
-em.set_foreground(DummyEffect)
+em.set_background("Dummy BG")
+em.update()
+print(".")
+em.set_foreground("Dummy FG")
 em.update()
 print(".")
 em.update()
