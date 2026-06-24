@@ -14,31 +14,15 @@ function qa_fix {
     ruff check --config "$SCRIPT_PATH/ruff.toml" --fix "$1"
 }
 
-function qa_root_check {
+function qa_check_all {
     qa_check .
 }
 
-function qa_root_fix {
+function qa_fix_all {
     qa_fix .
 }
 
-function qa_firmware_check {
-    qa_check firmware/
-}
-
-function qa_firmware_fix {
-    qa_fix firmware/
-}
-
-function qa_modules_check {
-    qa_check modules/
-}
-
-function qa_modules_fix {
-    qa_fix modules/
-}
-
-function qa_tools_check {
-    ruff check tools/
+function qa_type_check {
+    # TODO: Enable more directories
     ty check tools/
 }
