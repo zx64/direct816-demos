@@ -62,22 +62,36 @@ class MTWorker:
                     if not self.queue:
                         sleep(0)
                         continue
+                    # Only touch the queue inside the lock
                     func, args = self.queue.pop()
+                # Function is called outside of our lock
                 func(*args)
 
         _thread.start_new_thread(worker, (self,))
+
+    def wait_for_empty(self):
+        # Note that we do not sleep while holding the lock!
+        while not self.empty():
+            sleep(0)
 
     def empty(self):
         with self.lock:
             return not self.queue
 
     def call(self, func, *args):
+        # Prepare tuple before waiting for the lock
+        value = (func, args)
         with self.lock:
-            self.queue.append((func, args))
+            self.queue.append(value)
 
     def stop(self):
         with self.lock:
             self.running = False
+
+
+def prepare(core1_: bool):
+    # placeholder for 8-to-16 conversion
+    pass
 
 
 class EffectManager:
@@ -104,8 +118,9 @@ class EffectManager:
             self.mt.call(layer.effect.update, self.ticks, dT, True)
             layer.effect.update(self.ticks, dT, False)
 
-        while not self.mt.empty():
-            sleep(0)
+        self.mt.wait_for_empty()
+
+        self.ticks += 1
 
         for layer in self.layers:
             if not layer:
@@ -113,10 +128,11 @@ class EffectManager:
             self.mt.call(layer.draw, True)
             layer.draw(False)
 
-        while not self.mt.empty():
-            sleep(0)
+        # stub for 8-to-16 conversion
+        self.mt.call(prepare, True)
+        prepare(False)
 
-        self.ticks += 1
+        self.mt.wait_for_empty()
 
     def register_foreground_effect(self, name: str, effect: Effect):
         if name in self.foreground_effects:
